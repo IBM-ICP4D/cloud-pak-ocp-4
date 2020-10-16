@@ -1,0 +1,55 @@
+# {{ ansible_managed }}
+
+echo "Waiting for nodes to become ready"
+
+all_nodes="{% for host in groups['masters'] | union(groups['workers']) | sort -%}
+{{hostvars[host]['host']}}.{{cluster_name}}.{{domain_name}} {% if not loop.last -%} {%- endif %}
+{%- endfor %}"
+
+TIMEOUT=1800
+WAIT=10
+WAITED=0
+ALL_NODES_READY=0
+
+export KUBECONFIG={{ocp_install_dir}}/auth/kubeconfig
+
+while [ $ALL_NODES_READY -eq 0 ] && [ $WAITED -lt $TIMEOUT ];do
+  MISSING=0
+  NOT_READY=0
+  READY=0
+
+  # Approve any pending CSRs
+  oc get csr -ojson | jq -r '.items[] | select(.status == {} ) | .metadata.name' | \
+    xargs --no-run-if-empty oc adm certificate approve
+
+  for node in $all_nodes;do
+    oc get no $node >/dev/null 2>&1
+    if [ $? -ne 0 ];then
+      ((MISSING+=1))
+    else
+      node_status=$(oc get no $node -o jsonpath='{.status.conditions[?(.status=="True")].type}')
+      if [[ "$node_status" == "Ready" ]];then
+        ((READY+=1))
+      else
+        ((NOT_READY+=1))
+      fi
+    fi
+  done
+  # Now test if all nodes were ready
+  
+  if [ $MISSING -eq 0 ] && [ $NOT_READY -eq 0 ];then
+    ALL_NODES_READY=1
+  else
+    echo "Not all nodes are available yet: $READY ready, $MISSING missing, $NOT_READY not ready"
+    sleep $WAIT
+    let "WAITED+=WAIT"
+  fi
+done
+
+if [ $ALL_NODES_READY -eq 1 ];then
+  echo "All nodes are ready now"
+  oc get no
+else
+  echo "Not all nodes have become ready within $TIMEOUT seconds"
+  exit 1
+fi

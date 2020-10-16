@@ -1,0 +1,21 @@
+---
+
+- name: Create backup of /etc/resolv.conf
+  copy:
+    src: /etc/resolv.conf
+    dest: "/etc/resolv.conf_backup"
+    force: no
+
+- name: Generate dnsmasq.conf file
+  template:
+    src: dns_server.j2
+    dest: "/etc/dnsmasq.conf"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Start service dnsmasq
+  service:
+    name: dnsmasq
+    enabled: yes
+    state: restarted

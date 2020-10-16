@@ -1,0 +1,19 @@
+# {{ ansible_managed }}
+
+export KUBECONFIG={{ocp_install_dir}}/auth/kubeconfig
+# Disable the image registry
+oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"managementState":"Removed"}}'
+
+# Create PVC pointing to the registry storage class to use
+oc create -f {{ocp_install_dir}}/registry_storage.yaml
+oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"storage":{"pvc":{ "claim": "image-registry-pvc" }}}}'
+
+# Create the default route for the image registry
+oc patch configs.imageregistry.operator.openshift.io/cluster --patch '{"spec":{"defaultRoute":true}}' --type=merge
+
+# Enable the image registry
+oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"managementState":"Managed"}}'
+
+# Show the current status of the cluster operator
+echo "Showing status of image-registry cluster operator: oc get co image-registry"
+oc get co image-registry

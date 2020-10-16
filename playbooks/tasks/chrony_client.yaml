@@ -1,0 +1,9 @@
+---
+
+- name: Generate chrony client configuration to be used by the OpenShift nodes
+  template:
+    src: "chrony_client.j2"
+    dest: "{{ocp_install_dir}}/chrony_client.conf"
+    owner: root
+    group: root
+    mode: 0644

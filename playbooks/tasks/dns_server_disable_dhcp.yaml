@@ -1,0 +1,13 @@
+---
+
+- name: Disable DHCP on DNS server
+  replace:
+    path: /etc/dnsmasq.conf
+    regexp: '(dhcp.*)'
+    replace: '#\1'
+
+- name: Start service dnsmasq
+  service:
+    name: dnsmasq
+    enabled: yes
+    state: restarted

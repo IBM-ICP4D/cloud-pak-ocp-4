@@ -1,0 +1,36 @@
+---
+
+- name: Set permissions for NFS directory
+  file:
+    group: "root"
+    mode: 0777
+    owner: "root"
+    path: "{{ nfs_volume_mount_path }}"
+    state: directory
+
+- name: Create image registry directory
+  file:
+    mode: 0777
+    owner: "root"
+    group: "root"
+    path: "{{nfs_volume_mount_path}}/image-registry"
+    state: directory
+
+- name: copy /etc/exports
+  template:
+    src: nfs_server_exports.j2
+    dest: /etc/exports
+    owner: root
+    group: root
+
+- name: Start NFS service
+  service:
+    name: nfs-server
+    enabled: yes
+    state: restarted
+
+- name: Start RPC bind service
+  service:
+    name: rpcbind
+    enabled: yes
+    state: restarted

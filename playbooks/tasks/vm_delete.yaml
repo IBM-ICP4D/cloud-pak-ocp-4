@@ -1,0 +1,19 @@
+---
+# Delete VMs for the infrastructure
+
+- name: Delete {{ ocp_group }} VMs
+  vmware_guest:
+    hostname: "{{ vc_vcenter }}"
+    username: "{{ vc_user }}"
+    password: "{{ vc_password }}"
+    validate_certs: no
+    datacenter: "{{ vc_datacenter }}"
+    cluster: "{{ vc_cluster }}"
+    resource_pool: "{{ vc_res_pool }}"
+    folder: "{{ vc_folder }}"
+    name: "{{cluster_name}}-{{ hostvars[item].host }}"
+    state: absent
+    force: yes
+  with_items:
+    - "{{ groups[ocp_group] }}"
+  delegate_to: localhost

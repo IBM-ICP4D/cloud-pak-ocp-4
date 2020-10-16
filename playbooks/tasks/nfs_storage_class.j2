@@ -1,0 +1,48 @@
+# {{ ansible_managed }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: nfs-client-provisioner
+---
+kind: DeploymentConfig
+apiVersion: v1
+metadata:
+  name: nfs-client-provisioner
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: nfs-client-provisioner
+    spec:
+      serviceAccountName: nfs-client-provisioner
+      containers:
+        - name: nfs-client-provisioner
+          image: quay.io/external_storage/nfs-client-provisioner:latest
+          volumeMounts:
+            - name: nfs-client-root
+              mountPath: /persistentvolumes
+          env:
+            - name: PROVISIONER_NAME
+              value: icpd-nfs.io/nfs
+            - name: NFS_SERVER
+              value: {{groups['nfs'][0]}}
+            - name: NFS_PATH
+              value: {{ nfs_volume_mount_path }}
+      volumes:
+        - name: nfs-client-root
+          nfs:
+            server: {{groups['nfs'][0]}}
+            path: {{ nfs_volume_mount_path }}
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: nfs-client
+provisioner: icpd-nfs.io/nfs
+parameters:
+  archiveOnDelete: "false" # When set to "false" your PVs will not be archived
+                           # by the provisioner upon deletion of the PVC.

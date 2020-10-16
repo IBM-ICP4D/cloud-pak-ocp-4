@@ -1,0 +1,21 @@
+---
+
+- name: Check if interface script exists
+  stat:
+    path: "{{interface_script}}"
+  register: stat_result
+
+- name: Change DNS service in interface script
+  lineinfile:
+    path: "{{interface_script}}"
+    regexp: '^DNS1'
+    line: "DNS1={{groups['bastion'][0]}}"
+  when: stat_result.stat.exists==True
+  register: interface_changed
+
+- name: Restart NetworkManager service
+  service:
+    name: NetworkManager
+    enabled: yes
+    state: restarted
+  when: stat_result.stat.exists

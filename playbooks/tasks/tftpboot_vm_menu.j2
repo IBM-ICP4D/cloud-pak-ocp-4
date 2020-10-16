@@ -1,0 +1,9 @@
+default menu.c32
+# set Timeout 3 Seconds
+timeout 30
+ontimeout linux
+label linux
+  menu label ^Install RHEL CoreOS
+  menu default
+  kernel /images/vmlinuz
+  append initrd=/images/initramfs.img nomodeset rd.neednet=1 coreos.inst=yes coreos.inst.install_dev=sda coreos.inst.image_url=http://{{groups['bastion'][0]}}:{{http_server_port}}/{{metal_bios_file}} coreos.inst.ignition_url=http://{{groups['bastion'][0]}}:{{http_server_port}}/{{ocp_install_dir}}/{{cluster_name}}-{{node_type}}.ign nameserver={{groups['bastion'][0]}} ip={{item}}::{{default_gateway}}:255.255.255.0:{{hostvars[item]['host']}}.{{cluster_name}}.{{domain_name}}:ens192:none:{{groups['bastion'][0]}}

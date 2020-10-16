@@ -1,0 +1,8 @@
+---
+
+- name: Generate yaml files for image registry
+  template:
+    src: registry_storage.j2
+    dest: "{{ocp_install_dir}}/registry_storage.yaml"
+    owner: root
+    group: root

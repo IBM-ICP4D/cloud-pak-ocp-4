@@ -1,0 +1,25 @@
+---
+- name: Create OpenShift installation directory
+  file:
+    group: "root"
+    mode: 0755
+    owner: "root"
+    path: "{{ocp_install_dir}}"
+    state: directory
+
+- name: Create scripts directory
+  file:
+    group: "root"
+    mode: 0755
+    owner: "root"
+    path: "{{ocp_install_dir}}/scripts"
+    state: directory
+
+- name: Check if installation was already performed
+  stat:
+    path: "{{ocp_install_dir}}/auth"
+  register: auth_dir
+
+- set_fact:
+    install_script_already_run: True
+  when: auth_dir.stat.exists

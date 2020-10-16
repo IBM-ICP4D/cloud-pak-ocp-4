@@ -1,0 +1,5 @@
+---
+# Ping command, just to test inclusion
+
+- name: Ping
+  ping

@@ -1,0 +1,11 @@
+---
+
+- name: Copy inventory file to /etc/ansible/hosts
+  copy:
+    src: "{{inventory_file}}"
+    dest: /etc/ansible/hosts
+
+- name: Copy Ansible configuration to /etc/ansible/ansible.cfg
+  copy:
+    src: "{{script_dir}}/ansible.cfg"
+    dest: /etc/ansible/ansible.cfg

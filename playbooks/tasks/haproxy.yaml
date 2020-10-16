@@ -1,0 +1,22 @@
+---
+
+- name: Generate haproxy.cfg file
+  template:
+    src: haproxy.j2
+    dest: "/etc/haproxy/haproxy.cfg"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Allow all ports for HAProxy (SELinux)
+  seboolean:
+    name: haproxy_connect_any
+    state: yes
+    persistent: yes
+  when: ansible_selinux.status=='enabled'
+
+- name: Start service haproxy
+  service:
+    name: haproxy
+    enabled: yes
+    state: restarted

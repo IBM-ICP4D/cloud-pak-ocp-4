@@ -1,0 +1,23 @@
+---
+
+- name: Generate nginx configuration file
+  template:
+    src: http_server.j2
+    dest: "/etc/nginx/nginx.conf"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Allow nginx to listen on non-standard port (SELinux)
+  seport:
+    ports: "{{http_server_port}}"
+    proto: tcp
+    setype: http_port_t
+    state: present
+  when: ansible_selinux.status=='enabled'
+
+- name: Start nginx
+  service:
+    name: nginx
+    enabled: yes
+    state: restarted

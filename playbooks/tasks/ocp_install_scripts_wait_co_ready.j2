@@ -1,0 +1,36 @@
+#! /bin/bash
+SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )
+
+SLEEP_TIME=10
+TIME_OUT=900
+
+export KUBECONFIG={{ocp_install_dir}}/auth/kubeconfig
+
+wait_time=0
+ready=0
+while (("$ready"=="0"));do
+  oc get co --no-headers > /tmp/wait_co_ready.out
+  if [ $? == 0 ];then
+    not_ready_count=$(cat /tmp/wait_co_ready.out | awk '{print $3}' | grep -c "False")
+    progressing_count=$(cat /tmp/wait_co_ready.out | awk '{print $4}' | grep -c "True")
+    degraded_count=$(cat /tmp/wait_co_ready.out | awk '{print $5}' | grep -c "True")
+    if (("$not_ready_count"=="0" && "$progressing_count"=="0" && "$degraded_count"=="0"));then
+      ready=1
+    else
+      echo "Not ready: $not_ready_count, Progressing: $progressing_count, Degraded: $degraded_count"
+    fi
+  fi
+      
+  if (("$ready"=="0"));then    
+    echo "Cluster operators not ready yet, sleeping for $SLEEP_TIME seconds"
+    sleep $SLEEP_TIME
+    wait_time=$(($wait_time + $SLEEP_TIME))
+  fi
+  
+  if (("$wait_time" > "$TIME_OUT"));then
+    echo "Waiting for cluster operators to become ready timed out after $TIME_OUT seconds"
+    exit 1
+  fi
+done
+
+echo "All cluster operators are ready now"

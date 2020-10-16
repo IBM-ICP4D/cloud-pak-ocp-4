@@ -1,0 +1,23 @@
+---
+# Update hosts file
+
+- name: Check if /etc/cloud/cloud.cfg exists
+  stat:
+    path: "/etc/cloud/cloud.cfg"
+  register: cloud_cfg_file
+
+- name: Disable automatic updates of /etc/hosts, through /etc/cloud/cloud.cfg
+  replace:
+    path: "/etc/cloud/cloud.cfg"
+    regexp: "manage_etc_hosts: True"
+    replace: "manage_etc_hosts: False"
+  when: cloud_cfg_file.stat.exists == True
+
+- name: Add IP address of all hosts to /etc/hosts
+  lineinfile:
+    dest: /etc/hosts
+    regexp: '^.*{{ hostvars[item].host }}$'
+    line: "{{item}} {{ hostvars[item].host }}.{{cluster_name}}.{{domain_name}} {{ hostvars[item].host }}"
+    state: present
+  when: hostvars[item].host is defined
+  with_items: "{{ groups.all }}"

@@ -1,0 +1,13 @@
+---
+
+- name: Disable bootstrap in load balancer
+  replace:
+    path: /etc/haproxy/haproxy.cfg
+    regexp: '(^\s+)(server\s+bootstrap)(.*)'
+    replace: '\1#\2\3'
+
+- name: Start service haproxy
+  service:
+    name: haproxy
+    enabled: yes
+    state: restarted

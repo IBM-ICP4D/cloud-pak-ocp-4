@@ -1,0 +1,9 @@
+{% if http_proxy is defined %}
+export http_proxy={{http_proxy}}
+{% endif %}
+{% if https_proxy is defined %}
+export https_proxy={{https_proxy}}
+{% endif %}
+{% if no_proxy is defined %}
+export no_proxy={{no_proxy}}
+{% endif %}

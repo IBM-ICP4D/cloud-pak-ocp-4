@@ -1,0 +1,36 @@
+---
+# Generate install-config.yaml
+
+- name: Generate OCP admin password
+  htpasswd:
+    path: "{{ocp_install_dir}}/htpasswd"
+    name: admin
+    password: "{{ocp_admin_password}}"
+    owner: root
+    mode: 0640
+
+- name: Get pull secret from file
+  slurp:
+    src: "{{ pull_secret_file }}"
+  register: pull_secret
+
+- name: Get public SSH key
+  slurp:
+    src: "/root/.ssh/id_rsa.pub"
+  register: ssh_key
+
+- name: Generate install-config.yaml
+  template:
+    src: ocp_install_config.j2
+    dest: "{{ocp_install_dir}}/install-config.yaml"
+    owner: root
+    group: root
+    mode: 0666
+
+- name: Generate install-config.yaml in /tmp
+  template:
+    src: ocp_install_config.j2
+    dest: "/tmp/install-config.yaml"
+    owner: root
+    group: root
+    mode: 0666

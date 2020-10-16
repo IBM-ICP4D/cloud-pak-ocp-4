@@ -1,0 +1,126 @@
+---
+
+- name: Find CoreOS metal package
+  find:
+    paths: "{{ocp_install_dir}}"
+    patterns: "{{rhcos_metal_package_pattern}}"
+    use_regex: yes
+  register: found_metal_files
+
+- name: Find CoreOS installer ISO
+  find:
+    paths: "{{ocp_install_dir}}"
+    patterns: "{{rhcos_iso_package_pattern}}"
+    use_regex: yes
+  register: found_iso_files
+
+- name: Create TFTP directory
+  file:
+    group: "root"
+    mode: 0755
+    owner: "root"
+    path: "{{ocp_install_dir}}/tftpboot"
+    state: directory
+
+- name: Allow dnsmasq to read files in the TFTP directory (SELinux)
+  sefcontext:
+    target: '{{ocp_install_dir}}/tftpboot(/.*)?'
+    setype: tftpdir_t
+    seuser: system_u
+    ftype: a
+    state: present
+  when: ansible_selinux.status=='enabled'
+
+- name: Restore SELinux context for TFTP
+  shell: restorecon -Rv "{{ocp_install_dir}}/tftpboot"
+
+- name: Create TFTP images directory
+  file:
+    group: "root"
+    mode: 0755
+    owner: "root"
+    path: "{{ocp_install_dir}}/tftpboot/images"
+    state: directory
+
+- name: Extract kernel and ramdisk from ISO {{(found_iso_files.files | last)['path']}}
+  iso_extract:
+    image: "{{(found_iso_files.files | last)['path']}}"
+    dest: "{{ocp_install_dir}}/tftpboot/images/"
+    files:
+    - images/vmlinuz
+    - images/initramfs.img
+
+- name: Create TFTP configuration directory
+  file:
+    group: "root"
+    mode: 0755
+    owner: "root"
+    path: "{{ocp_install_dir}}/tftpboot/pxelinux.cfg"
+    state: directory
+
+- name: Check if /var/lib/tftpboot exists
+  stat:
+    path: "/var/lib/tftpboot"
+  register: var_lib_tftpboot
+
+- name: Create symlink /tftpboot if TFTP was installed in /var/lib/tftpboot
+  file:
+    path: "/tftpboot"
+    src: "/var/lib/tftpboot"
+    state: link
+  when: var_lib_tftpboot.stat.exists
+
+- name: Create symlinks to pxelinux.cfg and images
+  file:
+    path: "/tftpboot/{{item}}"
+    src: "{{ocp_install_dir}}/tftpboot/{{item}}"
+    state: link
+  with_items:
+    ['pxelinux.cfg','images']
+
+- name: Generate default boot configuration file
+  template:
+    src: tftpboot_default.j2
+    dest: "{{ocp_install_dir}}/tftpboot/pxelinux.cfg/default"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Generate boot menu for bootstrap
+  template:
+    src: tftpboot_vm_menu.j2
+    dest: "{{ocp_install_dir}}/tftpboot/pxelinux.cfg/{{hostvars[item]['host']}}"
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - "{{groups['bootstrap']}}"
+  vars:
+    node_type: bootstrap
+    metal_bios_file: "{{(found_metal_files.files | last)['path']}}" 
+
+- name: Generate boot menu for masters
+  template:
+    src: tftpboot_vm_menu.j2
+    dest: "{{ocp_install_dir}}/tftpboot/pxelinux.cfg/{{hostvars[item]['host']}}"
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - "{{groups['masters']}}"
+  vars:
+    node_type: master
+    metal_bios_file: "{{(found_metal_files.files | last)['path']}}" 
+
+- name: Generate boot menu for workers
+  template:
+    src: tftpboot_vm_menu.j2
+    dest: "{{ocp_install_dir}}/tftpboot/pxelinux.cfg/{{hostvars[item]['host']}}"
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - "{{groups['workers']}}"
+  vars:
+    node_type: worker
+    metal_bios_file: "{{(found_metal_files.files | last)['path']}}" 

@@ -1,0 +1,32 @@
+---
+# Set up password-less SSH
+
+- hosts: localhost
+  remote_user: root
+  gather_facts: no
+  become: yes
+
+  tasks:
+    - name: Get host name for current node
+      command: hostname
+      register: hostname
+
+    - name: Generate SSH key on current host (if not existent)
+      shell: |
+        if [ ! -e ~/.ssh/id_rsa ];then ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa -C "{{ hostname.stdout }}";fi
+      ignore_errors: true
+
+- hosts:
+    - lb
+    - nfs
+    - bastion
+  remote_user: root
+  gather_facts: no
+  become: yes
+
+  tasks:
+    - name: Configure host for password-less SSH
+      authorized_key:
+        user: root
+        state: present
+        key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"

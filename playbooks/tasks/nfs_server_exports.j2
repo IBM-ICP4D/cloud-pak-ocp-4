@@ -1,0 +1,5 @@
+# {{ ansible_managed }}
+
+{{ nfs_volume_mount_path }} *(rw,sync,no_root_squash)
+
+{{ nfs_volume_mount_path }}/image-registry *(rw,sync,no_root_squash)

@@ -1,0 +1,12 @@
+---
+
+- name: Reboot servers if needed and allowed
+  reboot:
+  when: reboot_server and allow_reboot|bool
+
+- name: Reboot servers manually !!!
+  debug:
+    msg:
+      - Changes have been made to this server which require a reboot. You must reboot the server
+      - manually before installing OpenShift.
+  when: reboot_server and not allow_reboot|bool

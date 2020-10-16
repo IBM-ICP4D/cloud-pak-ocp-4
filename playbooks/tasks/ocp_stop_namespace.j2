@@ -1,0 +1,33 @@
+#! /bin/bash
+SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )
+
+# Check number of parameters
+if [ "$#" -lt 2 ]; then
+    echo "Usage: $0 -n <namespace>"
+    exit 1
+fi
+
+# Parse parameters
+PARAMS=""
+while (( "$#" )); do
+  case "$1" in
+    -n)
+      NAMESPACE=$2
+      shift 2
+      ;;
+    *) # preserve remaining arguments
+      PARAMS="$PARAMS $1"
+      shift
+      ;;
+  esac
+done
+
+# Set remaining parameters
+eval set -- "$PARAMS"
+
+# Set resource quote for project
+echo "Setting compute quota of namespace $NAMESPACE to 0"
+oc create quota project-quota-pods-0 --hard pods="0" -n $NAMESPACE
+
+echo "Stopping all pods in namespace $NAMESPACE"
+oc delete po -n $NAMESPACE --all

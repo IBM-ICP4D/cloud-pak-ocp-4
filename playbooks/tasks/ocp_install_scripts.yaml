@@ -1,0 +1,92 @@
+---
+
+- name: Generate {{ocp_install_dir}}/scripts/wait_bootstrap.sh
+  template:
+    src: ocp_install_scripts_bootstrap_wait.j2
+    dest: "{{ocp_install_dir}}/scripts/wait_bootstrap.sh"
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Generate {{ocp_install_dir}}/scripts/remove_bootstrap.sh
+  template:
+    src: ocp_install_scripts_bootstrap_remove.j2
+    dest: "{{ocp_install_dir}}/scripts/remove_bootstrap.sh"
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Generate {{ocp_install_dir}}/scripts/wait_nodes_ready.sh
+  template:
+    src: ocp_install_scripts_wait_nodes_ready.j2
+    dest: "{{ocp_install_dir}}/scripts/wait_nodes_ready.sh"
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Generate {{ocp_install_dir}}/scripts/create_registry_storage.sh
+  template:
+    src: ocp_install_scripts_create_registry_storage.j2
+    dest: "{{ocp_install_dir}}/scripts/create_registry_storage.sh"
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Generate {{ocp_install_dir}}/scripts/wait_install.sh
+  template:
+    src: ocp_install_scripts_install_wait.j2
+    dest: "{{ocp_install_dir}}/scripts/wait_install.sh"
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Generate {{ocp_install_dir}}/scripts/create_admin_user.sh
+  template:
+    src: ocp_install_scripts_create_admin_user.j2
+    dest: "{{ocp_install_dir}}/scripts/create_admin_user.sh"
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Generate {{ocp_install_dir}}/scripts/post_install.sh
+  template:
+    src: ocp_install_scripts_post_install.j2
+    dest: "{{ocp_install_dir}}/scripts/post_install.sh"
+    owner: root
+    group: root
+    mode: 0755
+
+- include: nfs_storage_class_script.yaml
+  when: create_nfs_sc|bool
+
+- name: Generate {{ocp_install_dir}}/scripts/disable_dhcp.sh
+  template:
+    src: ocp_install_scripts_dhcp_disable.j2
+    dest: "{{ocp_install_dir}}/scripts/disable_dhcp.sh"
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Generate {{ocp_install_dir}}/scripts/wait_co_ready.sh
+  template:
+    src: ocp_install_scripts_wait_co_ready.j2
+    dest: "{{ocp_install_dir}}/scripts/wait_co_ready.sh"
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Generate {{ocp_install_dir}}/scripts/start_namespace.sh
+  template:
+    src: ocp_start_namespace.j2
+    dest: "{{ocp_install_dir}}/scripts/start_namespace.sh"
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Generate {{ocp_install_dir}}/scripts/stop_namespace.sh
+  template:
+    src: ocp_stop_namespace.j2
+    dest: "{{ocp_install_dir}}/scripts/stop_namespace.sh"
+    owner: root
+    group: root
+    mode: 0755

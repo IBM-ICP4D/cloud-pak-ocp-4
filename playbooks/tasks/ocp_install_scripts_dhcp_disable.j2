@@ -1,0 +1,5 @@
+# {{ ansible_managed }}
+
+echo "Disabling DHCP for the DNS server"
+ansible-playbook -i {{inventory_file}} {{script_dir}}/playbooks/ocp4_disable_dhcp.yaml \
+  "$@"

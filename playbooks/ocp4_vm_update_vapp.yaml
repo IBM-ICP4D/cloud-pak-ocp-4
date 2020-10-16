@@ -1,0 +1,25 @@
+---
+# This playbook update the VMs with vApp properties
+
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  become: no
+  tasks:
+    - name: Update vApp of bootstrap vm
+      include: tasks/vm_update_vapp.yaml
+      vars:
+        ocp_group: bootstrap
+        node_type: bootstrap
+        
+    - name: Update vApp of master vms
+      include: tasks/vm_update_vapp.yaml
+      vars:
+        ocp_group: masters
+        node_type: master
+
+    - name: Update vApp of worker vms
+      include: tasks/vm_update_vapp.yaml
+      vars:
+        ocp_group: workers
+        node_type: worker

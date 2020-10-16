@@ -1,0 +1,22 @@
+---
+# This playbook delete the VMware environment
+
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  become: no
+  tasks:
+    - name: Delete bootstrap vm
+      include: tasks/vm_delete.yaml
+      vars:
+        ocp_group: bootstrap
+
+    - name: Delete master vms
+      include: tasks/vm_delete.yaml
+      vars:
+        ocp_group: masters
+
+    - name: Delete worker vms
+      include: tasks/vm_delete.yaml
+      vars:
+        ocp_group: workers

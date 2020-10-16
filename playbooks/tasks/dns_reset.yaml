@@ -1,0 +1,16 @@
+---
+
+- name: Check if backup of /etc/resolv.conf exists
+  stat:
+    path: "/etc/resolv.conf_backup"
+  register: resolv_conf_backup
+
+- name: Restore /etc/resolv.conf
+  copy:
+    src: "/etc/resolv.conf_backup"
+    dest: "/etc/resolv.conf"
+    force: yes
+    owner: root
+    group: root
+    mode: 0644
+  when: resolv_conf_backup.stat.exists

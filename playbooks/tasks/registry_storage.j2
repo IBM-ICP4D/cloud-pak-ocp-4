@@ -1,0 +1,14 @@
+# {{ ansible_managed }}
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: image-registry-pvc
+  namespace: openshift-image-registry
+spec:
+  storageClassName: "{{image_registry_storage_class}}"
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: "{{image_registry_size}}"

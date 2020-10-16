@@ -1,0 +1,228 @@
+---
+
+- hosts: localhost
+  connection: local
+  tasks:
+
+    - name: Delete left-over recovery directory
+      file:
+        path: "{{ocp_install_dir}}/recovery"
+        state: absent
+
+    - name: Create recovery directory
+      file:
+        group: "root"
+        mode: 0755
+        owner: "root"
+        path: "{{ocp_install_dir}}/recovery"
+        state: directory
+
+- hosts: masters[0]
+  remote_user: core
+  become: yes
+  gather_facts: no
+  tasks:
+    - name: Get OpenShift version
+      shell: |
+        oc version
+      register: oc_version_full
+    
+    - set_fact:
+        oc_version="{{oc_version_full.stdout | regex_search(regexp,'\\0') | first}}"
+      vars:
+        regexp: '\d+\.\d+\.\d+'
+
+    - debug:
+        msg: "{{oc_version}}"
+
+    - name: Obtain Kubernetes API Server Operator image reference for OpenShift version {{oc_version}}
+      shell: |
+        oc adm release info --registry-config='/var/lib/kubelet/config.json' \
+          "quay.io/openshift-release-dev/ocp-release:{{oc_version}}-x86_64" \
+          --image-for=cluster-kube-apiserver-operator
+      register: kao_image
+
+    - set_fact:
+        kao_image_name="{{kao_image.stdout}}"
+
+    - name: Obtain currently running pods
+      shell: |
+        crictl pods > /tmp/pods_before.log
+
+    - name: Pull the cluster-kube-apiserver-operator image
+      shell: |
+        podman pull --authfile=/var/lib/kubelet/config.json "{{kao_image_name}}"
+    
+    - name: Destroy current recovery API server
+      shell: |
+        podman run -it --network=host -v /etc/kubernetes/:/etc/kubernetes/:Z \
+          --entrypoint=/usr/bin/cluster-kube-apiserver-operator "{{kao_image_name}}" \
+          recovery-apiserver destroy
+      register: recovery_active
+      failed_when: recovery_active.rc != 1 and recovery_active.rc != 0
+
+    - name: Start Kubernetes API Operator pod
+      shell: |
+        podman run -it --network=host -v /etc/kubernetes/:/etc/kubernetes/:Z \
+          --entrypoint=/usr/bin/cluster-kube-apiserver-operator "{{kao_image_name}}" \
+          recovery-apiserver create
+
+    - name: Wait for recovery API server to come up
+      shell: |
+        export KUBECONFIG=/etc/kubernetes/static-pod-resources/recovery-kube-apiserver-pod/admin.kubeconfig
+        until oc get namespace kube-system 2>/dev/null 1>&2; do echo "waiting...";sleep 1; done
+
+    - name: Regenerate certificates
+      shell: |
+        podman run -it --network=host -v /etc/kubernetes/:/etc/kubernetes/:Z \
+          --entrypoint=/usr/bin/cluster-kube-apiserver-operator "{{kao_image_name}}" \
+          regenerate-certificates
+
+    - name: Force new roll-outs
+      shell: |
+        export KUBECONFIG=/etc/kubernetes/static-pod-resources/recovery-kube-apiserver-pod/admin.kubeconfig
+        oc patch kubeapiserver cluster \
+          -p='{"spec": {"forceRedeploymentReason": "recovery-'"$( date --rfc-3339=ns )"'"}}' --type=merge
+        oc patch kubecontrollermanager cluster \
+          -p='{"spec": {"forceRedeploymentReason": "recovery-'"$( date --rfc-3339=ns )"'"}}' --type=merge
+        oc patch kubescheduler cluster \
+          -p='{"spec": {"forceRedeploymentReason": "recovery-'"$( date --rfc-3339=ns )"'"}}' --type=merge
+
+    - name: Recover kubeconfig
+      shell: |
+        export KUBECONFIG=/etc/kubernetes/static-pod-resources/recovery-kube-apiserver-pod/admin.kubeconfig
+        /usr/local/bin/recover-kubeconfig.sh > /tmp/copy-kubeconfig
+
+    - name: Get CA certificate
+      shell: |
+        export KUBECONFIG=/etc/kubernetes/static-pod-resources/recovery-kube-apiserver-pod/admin.kubeconfig
+        oc get configmap kube-apiserver-to-kubelet-client-ca -n openshift-kube-apiserver-operator \
+        --template='{{ '{{' }} index .data "ca-bundle.crt" {{ '}}' }}' > /tmp/copy-kubelet-ca.crt
+
+    - name: Fetch the generated files
+      fetch:
+        src: "{{item}}"
+        flat: yes
+        dest: "{{ocp_install_dir}}/recovery/"
+      with_items:
+        - /tmp/copy-kubeconfig
+        - /tmp/copy-kubelet-ca.crt
+
+- hosts: 
+    - masters
+  remote_user: core
+  become: yes
+  gather_facts: no
+  tasks:
+    - name: Copy kubeconfig and CA certificate to masters
+      copy:
+        src: "{{item.src}}"
+        dest: "{{item.dest}}"
+      with_items:
+        - { src: '{{ocp_install_dir}}/recovery/copy-kubeconfig', dest: '/etc/kubernetes/kubeconfig'}
+        - { src: '{{ocp_install_dir}}/recovery/copy-kubelet-ca.crt', dest: '/etc/kubernetes/kubelet-ca.crt'}
+
+    - name: Force deamon-reload on masters
+      file:
+        path: /run/machine-config-daemon-force
+        state: touch
+
+    - name: Stop kubelet on masters
+      shell: |
+        systemctl stop kubelet
+        rm -rf /var/lib/kubelet/pki /var/lib/kubelet/kubeconfig
+    
+    - name: Wait for 10 seconds for kubelet to stop on masters
+      pause:
+        seconds: 10
+    
+    - name: Kill pods on masters
+      shell: |
+        if [ -e /tmp/pods_before.log ];then
+        crictl stopp $(cat /tmp/pods_before.log | awk '{print $1}' | grep -v POD)
+        crictl rmp $(cat /tmp/pods_before.log | awk '{print $1}' | grep -v POD)
+        else
+        crictl stopp $(crictl pods | awk '{print $1}' | grep -v POD)
+        crictl rmp $(crictl pods | awk '{print $1}' | grep -v POD)
+        fi
+        
+    - name: Restart kubelet on masters
+      shell: |
+        systemctl start kubelet
+    
+    - name: Wait for 2 minutes for kubelet to come up on masters and to start generating CSRs
+      pause:
+        minutes: 2
+
+- hosts: masters[0]
+  remote_user: core
+  become: yes
+  gather_facts: no
+  tasks:
+    - name: Approve CSRs and wait for masters to become ready (max 30 mins)
+      shell: |
+        export KUBECONFIG=/etc/kubernetes/static-pod-resources/recovery-kube-apiserver-pod/admin.kubeconfig
+        oc get csr --no-headers 2> /dev/null | grep Pending | awk '{print $1}' | xargs -r oc adm certificate approve
+        echo "Not ready nodes are" $(oc get no --no-headers | grep master | grep -i NotReady | wc -l)
+      register: not_ready_nodes
+      until: not_ready_nodes.stdout.find("Not ready nodes are 0") != -1
+      retries: 60
+      delay: 30
+      ignore_errors: yes
+
+- hosts: 
+    - workers
+  remote_user: core
+  become: yes
+  gather_facts: no
+  tasks:
+    - name: Stop kubelet on workers
+      shell: |
+        systemctl stop kubelet
+        rm -rf /var/lib/kubelet/pki /var/lib/kubelet/kubeconfig
+    
+    - name: Wait for 10 seconds for kubelet to stop on workers
+      pause:
+        seconds: 10
+
+    - name: Restart kubelet on workers
+      shell: |
+        systemctl start kubelet
+
+    - name: Wait for 2 minutes for kubelet to come up on workers and to start generating CSRs
+      pause:
+        minutes: 2
+
+- hosts: masters[0]
+  remote_user: core
+  become: yes
+  gather_facts: no
+  tasks:
+    - name: Approve CSRs and wait for workers to become ready (max 30 mins)
+      shell: |
+        export KUBECONFIG=/etc/kubernetes/static-pod-resources/recovery-kube-apiserver-pod/admin.kubeconfig
+        oc get csr --no-headers 2> /dev/null | grep Pending | awk '{print $1}' | xargs -r oc adm certificate approve
+        echo "Not ready nodes are" $(oc get no --no-headers | grep worker | grep -i NotReady | wc -l)
+      register: not_ready_nodes
+      until: not_ready_nodes.stdout.find("Not ready nodes are 0") != -1
+      retries: 60
+      delay: 30
+      ignore_errors: yes
+
+    - name: Copy script to wait for cluster operators to first master node
+      copy:
+        src: '{{ocp_install_dir}}/scripts/wait_co_ready.sh'
+        dest: "/tmp/wait_co_ready.sh"
+        mode: preserve
+
+    - name: Wait for cluster operators to become ready, this may take 10-15 minutes
+      shell: |
+        export KUBECONFIG=/etc/kubernetes/static-pod-resources/recovery-kube-apiserver-pod/admin.kubeconfig
+        /tmp/wait_co_ready.sh
+
+    - name: Destroy recovery API server {{kao_image_name}}
+      shell: |
+        podman run -it --network=host -v /etc/kubernetes/:/etc/kubernetes/:Z \
+          --entrypoint=/usr/bin/cluster-kube-apiserver-operator "{{kao_image_name}}" \
+          recovery-apiserver destroy
+      tags: destroy

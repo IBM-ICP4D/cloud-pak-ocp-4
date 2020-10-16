@@ -1,0 +1,31 @@
+---
+
+- name: Create directory for NFS client
+  file:
+    group: "root"
+    mode: 0755
+    owner: "root"
+    path: "{{ocp_install_dir}}/nfs-client"
+    state: directory
+
+- name: Create NFS storage class yaml
+  template:
+    src: nfs_storage_class.j2
+    dest: "{{ocp_install_dir}}/nfs-client/nfs-storage-class.yaml"
+    owner: root
+    group: root
+
+- name: Create cluster role binding yaml
+  template:
+    src: nfs_storage_class_cluster_role.j2
+    dest: "{{ocp_install_dir}}/nfs-client/nfs-storage-class-cluster-role.yaml"
+    owner: root
+    group: root
+
+- name: Generate NFS storage class creation script
+  template:
+    src: nfs_storage_scripts.j2
+    dest: "{{ocp_install_dir}}/scripts/create_nfs_sc.sh"
+    owner: root
+    group: root
+    mode: 755

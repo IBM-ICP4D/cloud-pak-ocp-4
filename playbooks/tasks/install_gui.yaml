@@ -1,0 +1,76 @@
+---
+# Install GNOME and VNC on the load balancer
+
+- name: Install Gnome desktop environment
+  yum:
+    name: '@gnome-desktop'
+    state: present
+
+- name: Activate Gnome desktop
+  shell: |
+    systemctl set-default graphical.target
+
+- name: Install VNC server
+  yum:
+    name: tigervnc-server
+    state: present
+
+- name: Copy configuration file
+  copy:
+    dest: /etc/systemd/system/vncserver-root@:1.service
+    force: false
+    remote_src: true
+    src: /usr/lib/systemd/system/vncserver@.service
+
+- name: Configure ExecStart
+  lineinfile:
+    line: ExecStart=/usr/sbin/runuser -l root -c "/usr/bin/vncserver %i -geometry 1920x1080 -geometry 1280x768"
+    path: /etc/systemd/system/vncserver-root@:1.service
+    regexp: ^ExecStart=
+
+- name: Configure PIDFile
+  lineinfile:
+    line: PIDFile=/root/.vnc/%H%i.pid
+    path: /etc/systemd/system/vncserver-root@:1.service
+    regexp: ^PIDFile=
+
+- name: Remove service user directive which sometimes seems to be present
+  lineinfile:
+    path: /etc/systemd/system/vncserver-root@:1.service
+    regexp: ^User=
+    state: absent
+
+- name: Check if VNC password is already set
+  stat:
+    path: /root/.vnc/passwd
+  register: vnc_passwd_file
+
+- name: Create .vnc directory
+  file:
+    group: "root"
+    mode: 0755
+    owner: "root"
+    path: /root/.vnc
+    state: directory
+  when: not vnc_passwd_file.stat.exists
+
+- name: Set default VNC password
+  shell: |
+    set -o pipefail
+    echo "passw0rd" | vncpasswd -f > /root/.vnc/passwd
+  when: not vnc_passwd_file.stat.exists
+
+- name: Set correct permissions for VNC passwd file
+  file:
+    group: "root"
+    mode: 0600
+    owner: "root"
+    path: /root/.vnc/passwd
+  when: not vnc_passwd_file.stat.exists
+
+- name: Start and enable VNC service
+  systemd:
+    daemon_reload: true
+    enabled: true
+    name: vncserver-root@:1
+    state: restarted

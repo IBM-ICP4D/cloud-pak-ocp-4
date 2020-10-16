@@ -1,0 +1,16 @@
+---
+
+- name: Check if libvirt network is active
+  shell: |
+    virsh net-list 2> /dev/null
+  register: libvirt_active
+  changed_when: libvirt_active.rc == 1
+  failed_when: libvirt_active.rc not in [0,1]
+  ignore_errors: true
+
+- name: Disable libvirt network
+  shell: |
+    virsh net-destroy default
+    virsh net-autostart --network default --disable
+  when: libvirt_active.stdout.find("default") != -1
+  ignore_errors: true

@@ -1,0 +1,27 @@
+---
+
+- name: Generate chrony server configuration
+  template:
+    src: "chrony_server.j2"
+    dest: "/etc/chrony.conf"
+    owner: root
+    group: root
+    mode: 0644
+  register: chrony_configured
+
+- name: Stop service chronyd
+  service:
+    name: chronyd
+    enabled: no
+    state: stopped
+
+- name: Synchronize the time
+  shell: |
+    chronyd -q 'server {{ntp_servers[0]}} iburst'
+    rm -f /var/run/chronyd.pid
+
+- name: Restart service chronyd
+  service:
+    name: chronyd
+    enabled: yes
+    state: restarted

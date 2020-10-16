@@ -1,0 +1,86 @@
+---
+# Create VMs for the infrastructure
+
+- name: Create empty {{ ocp_group }} VMs
+  vmware_guest:
+    hostname: "{{ vc_vcenter }}"
+    username: "{{ vc_user }}"
+    password: "{{ vc_password }}"
+    validate_certs: no
+    datacenter: "{{ vc_datacenter }}"
+    cluster: "{{ vc_cluster }}"
+    resource_pool: "{{ vc_res_pool }}"
+    folder: "{{ vc_folder }}"
+    name: "{{cluster_name}}-{{ hostvars[item].host }}"
+    state: present
+    guest_id: "{{ vc_guest_id }}"
+    wait_for_ip_address: no
+    hardware:
+      memory_mb: "{{ vm_memory }}"
+      num_cpus: "{{ vm_cpu }}"
+      boot_firmware: bios
+      scsi: paravirtual
+    disk:
+    - size_gb: "{{ vm_disk }}"
+      datastore: "{{ vc_datastore }}"
+      type: thin
+    networks:
+    - name: "{{ vc_network }}"
+      device_type: vmxnet3
+  with_items:
+    - "{{ groups[ocp_group] }}"
+  delegate_to: localhost
+  register: vm_guest_facts_pxe
+  when: rhcos_installation_method=="pxe"
+
+- name: Create {{ ocp_group }} VMs using template {{vm_template}}
+  vmware_guest:
+    hostname: "{{ vc_vcenter }}"
+    username: "{{ vc_user }}"
+    password: "{{ vc_password }}"
+    validate_certs: no
+    datacenter: "{{ vc_datacenter }}"
+    cluster: "{{ vc_cluster }}"
+    resource_pool: "{{ vc_res_pool }}"
+    folder: "{{ vc_folder }}"
+    name: "{{cluster_name}}-{{ hostvars[item].host }}"
+    template: "{{vm_template}}"
+    state: present
+    guest_id: "{{ vc_guest_id }}"
+    wait_for_ip_address: no
+    hardware:
+      memory_mb: "{{ vm_memory }}"
+      num_cpus: "{{ vm_cpu }}"
+      boot_firmware: bios
+      scsi: paravirtual
+    disk:
+    - size_gb: "{{ vm_disk }}"
+      datastore: "{{ vc_datastore }}"
+      type: thin
+    networks:
+    - name: "{{ vc_network }}"
+      device_type: vmxnet3
+  with_items:
+    - "{{ groups[ocp_group] }}"
+  delegate_to: localhost
+  register: vm_guest_facts_ova
+  when: rhcos_installation_method=="ova"
+
+- name: Register in inventory file (if empty VMs)
+  replace:
+    path: "{{ inventory_file }}"
+    regexp: '^(.*{{ item.item }}.*mac=)"(.*)"(.*)?$'
+    replace: '\1"{{ item.instance.hw_eth0.macaddress }}"\3'
+  with_items: "{{ vm_guest_facts_pxe.results }}"
+  when: rhcos_installation_method=="pxe"
+
+- name: Register in inventory file (when using template)
+  replace:
+    path: "{{ inventory_file }}"
+    regexp: '^(.*{{ item.item }}.*mac=)"(.*)"(.*)?$'
+    replace: '\1"{{ item.instance.hw_eth0.macaddress }}"\3'
+  with_items: "{{ vm_guest_facts_ova.results }}"
+  when: rhcos_installation_method=="ova"
+
+
+- meta: refresh_inventory

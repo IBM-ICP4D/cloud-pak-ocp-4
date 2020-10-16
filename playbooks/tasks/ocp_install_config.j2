@@ -1,0 +1,40 @@
+# {{ ansible_managed }}
+
+apiVersion: v1
+baseDomain: {{ domain_name }}
+{% if http_proxy is defined %}
+proxy:
+  httpProxy: {{http_proxy}}
+  httpsProxy: {{https_proxy}}
+  noProxy: {{no_proxy}}
+{% endif %}
+compute:
+- hyperthreading: Enabled
+  name: worker
+  replicas: 0
+controlPlane:
+  hyperthreading: Enabled
+  name: master
+  replicas: 3
+metadata:
+  name: {{ cluster_name }}
+platform:
+  none: {}
+{% if service_network is defined %}
+networking:
+  serviceNetwork:
+  - {{ service_network }}
+{% endif %}
+pullSecret: '{{ pull_secret['content'] | b64decode | trim }}'
+sshKey: '{{ ssh_key['content'] | b64decode | trim }}'
+{% if air_gapped_install is defined and air_gapped_install %}
+additionalTrustBundle: |
+{{ lookup('file', air_gapped_registry_trust_bundle_file) | indent(2,true) }}
+imageContentSources:
+- mirrors:
+  - {{air_gapped_mirror_ocp_release}}
+  source: {{air_gapped_source_ocp_release}}
+- mirrors:
+  - {{air_gapped_mirror_ocp_release_dev}}
+  source: {{air_gapped_source_ocp_release_dev}}
+{% endif %}

@@ -1,0 +1,8 @@
+---
+
+- name: Generate yaml files for creation of the OAuth
+  template:
+    src: create_oauth.j2
+    dest: "{{ocp_install_dir}}/ocp_oauth.yaml"
+    owner: root
+    group: root

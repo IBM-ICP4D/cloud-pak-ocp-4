@@ -1,0 +1,45 @@
+# {{ ansible_managed }}
+
+# Servers to be used as a Chrony/NTP time server
+{% for ntp_server in ntp_servers %}
+server {{ntp_server}} iburst
+{% endfor %}
+
+# Record the rate at which the system clock gains/losses time.
+driftfile /var/lib/chrony/drift
+
+# Force the clock to be stepped at restart of the service (at boot)
+# if the time difference is greater than 1 second
+initstepslew 1 {{ntp_servers[0]}}
+
+# Allow the system clock to be stepped in the first three updates
+# if its offset is larger than 1 second.
+makestep 1.0 3
+
+# Enable kernel synchronization of the real-time clock (RTC).
+rtcsync
+
+# Enable hardware timestamping on all interfaces that support it.
+#hwtimestamp *
+
+# Increase the minimum number of selectable sources required to adjust
+# the system clock.
+#minsources 2
+
+# Allow NTP client access from local network.
+{% if setup_chrony_server %}
+allow {{ ntp_allow }}
+{% endif %}
+
+# Serve time even if not synchronized to a time source.
+#local stratum 10
+
+# Specify file containing keys for NTP authentication.
+#keyfile /etc/chrony.keys
+
+# Specify directory for log files.
+logdir /var/log/chrony
+
+# Log slews made by the system, do not log anything else
+log tracking
+# log measurements statistics tracking  # This is the default value

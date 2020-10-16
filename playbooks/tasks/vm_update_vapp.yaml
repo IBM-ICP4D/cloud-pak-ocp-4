@@ -1,0 +1,25 @@
+---
+# Change vApp properties of the VMs to include ignition info
+
+- name: Change vApp properties of {{ocp_group}} VMs
+  vmware_guest:
+    hostname: "{{ vc_vcenter }}"
+    username: "{{ vc_user }}"
+    password: "{{ vc_password }}"
+    validate_certs: no
+    datacenter: "{{ vc_datacenter }}"
+    cluster: "{{ vc_cluster }}"
+    resource_pool: "{{ vc_res_pool }}"
+    folder: "{{ vc_folder }}"
+    name: "{{cluster_name}}-{{ hostvars[item].host }}"
+    state: present
+    vapp_properties:
+      - id: "guestinfo.ignition.config.data.encoding"
+        value: "base64"
+      - id: "guestinfo.ignition.config.data"
+        value: "{{ lookup('file', ocp_install_dir+'/'+cluster_name+'-'+node_type+'.ign') | b64encode }}"
+      - id: "disk.EnableUUID"
+        value: "TRUE"
+  with_items:
+    - "{{ groups[ocp_group] }}"
+  delegate_to: localhost

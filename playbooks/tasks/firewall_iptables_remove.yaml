@@ -1,0 +1,46 @@
+---
+# Remove all rules from iptables
+
+- name: Gather service facts
+  service_facts:
+
+- name: Stop iptables service
+  service:
+    name: iptables
+    enabled: no
+    state: stopped
+  when: "'iptables' in services"
+
+- name: Stop firewalld service
+  service:
+    name: firewalld
+    enabled: no
+    state: stopped
+  when: "'firewalld' in services"
+
+- name: Check if Kubernetes forwards are already in iptables
+  shell: |
+    iptables -nvL | awk '/kubernetes/ {count ++} END {print count}'
+  register: kubernetes_forwards
+
+- name: Flush all rules from iptables (only if kubernetes forwards do not exist)
+  shell: |
+    iptables -P INPUT ACCCEPT
+    iptables -P FORWARD ACCCEPT
+    iptables -P OUTPUT ACCCEPT
+    iptables -F INPUT
+    iptables -F FORWARD
+    iptables -F OUTPUT
+  when: kubernetes_forwards.stdout == ""
+
+- name: Save rules into configuration (only if kubernetes forwards do not exist)
+  shell: |
+    iptables-save > /etc/sysconfig/iptables
+  when: kubernetes_forwards.stdout == ""
+
+- name: Restart iptables service
+  service:
+    name: iptables
+    enabled: yes
+    state: started
+  when: "'iptables' in services"

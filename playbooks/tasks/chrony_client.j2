@@ -1,0 +1,34 @@
+# {{ ansible_managed }}
+
+# Servers to be used as a Chrony/NTP time server
+{% if setup_chrony_server %}
+server {{groups['bastion'][0]}} iburst
+{% else %}
+{% for ntp_server in ntp_servers %}
+server {{ntp_server}} iburst
+{% endfor %}
+{% endif %}
+
+# Record the rate at which the system clock gains/losses time.
+driftfile /var/lib/chrony/drift
+
+# Synchronize with local clock
+local stratum 10
+
+# Force the clock to be stepped at restart of the service (at boot)
+# if the time difference is greater than 1 second
+{% if setup_chrony_server %}
+initstepslew 1 {{groups['bastion'][0]}}
+{% else %}
+initstepslew 1 {{ntp_servers[0]}}
+{% endif %}
+
+# Allow the system clock to be stepped in the first three updates
+# if its offset is larger than 1 second.
+makestep 1.0 3
+
+# Enable kernel synchronization of the real-time clock (RTC).
+rtcsync
+
+# Specify directory for log files.
+logdir /var/log/chrony

@@ -1,0 +1,31 @@
+---
+# This playbook prepares the VMware environment to install OpenShift 4.x
+
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  become: no
+  tasks:
+    - name: Create bootstrap vm
+      include: tasks/vm_create.yaml
+      vars:
+        ocp_group: bootstrap
+        vm_memory: "{{ vm_bootstrap_mem }}"
+        vm_cpu: "{{ vm_bootstrap_cpu }}"
+        vm_disk: "{{ vm_bootstrap_disk }}"
+        
+    - name: Create master vms
+      include: tasks/vm_create.yaml
+      vars:
+        ocp_group: masters
+        vm_memory: "{{ vm_master_mem }}"
+        vm_cpu: "{{ vm_master_cpu }}"
+        vm_disk: "{{ vm_master_disk }}"
+
+    - name: Create worker vms
+      include: tasks/vm_create.yaml
+      vars:
+        ocp_group: workers
+        vm_memory: "{{ vm_worker_mem }}"
+        vm_cpu: "{{ vm_worker_cpu }}"
+        vm_disk: "{{ vm_worker_disk }}"

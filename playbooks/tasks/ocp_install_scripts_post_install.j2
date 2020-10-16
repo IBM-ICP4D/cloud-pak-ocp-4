@@ -1,0 +1,24 @@
+# {{ ansible_managed }}
+
+export KUBECONFIG={{ocp_install_dir}}/auth/kubeconfig
+
+echo "Removing kubeadmin user"
+oc delete secrets kubeadmin -n kube-system
+
+{% if opt_out_health_checking is defined and opt_out_health_checking %}
+echo "Opt out of remote health checking"
+oc extract secret/pull-secret -n openshift-config --to=/tmp
+cat /tmp/.dockerconfigjson | jq 'del(.auths["cloud.openshift.com"])' > /tmp/new_ocp_pullsecret.json
+oc set data secret/pull-secret -n openshift-config --from-file=.dockerconfigjson=/tmp/new_ocp_pullsecret.json
+{% endif %}
+
+echo "Unlinking PXE boot files"
+unlink {{ocp_install_dir}}/tftpboot/pxelinux.cfg/01* 2>/dev/null
+
+echo "Rebuilding ~/.ssh/known_hosts to allow password-less ssh"
+rm -f /root/.ssh/known_hosts
+{% for host in groups['masters'] | union(groups['workers']) | sort %}
+    ssh-keyscan {{host}} >> ~/.ssh/known_hosts 2>&1 /dev/null
+    ssh-keyscan {{hostvars[host]['host']}}.{{cluster_name}}.{{domain_name}} >> ~/.ssh/known_hosts 2>&1 /dev/null
+    ssh-keyscan {{hostvars[host]['host']}} >> ~/.ssh/known_hosts 2>&1 /dev/null
+{% endfor %}

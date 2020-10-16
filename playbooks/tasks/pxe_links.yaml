@@ -1,0 +1,13 @@
+---
+
+- name: Create links for MAC addresses for PXE boot
+  file:
+    src: "{{ocp_install_dir}}/tftpboot/pxelinux.cfg/{{hostvars[item]['host']}}"
+    dest: "{{ocp_install_dir}}/tftpboot/pxelinux.cfg/01-{{hostvars[item]['mac'] | lower | replace(':','-')}}"
+    owner: root
+    group: root
+    state: link
+  with_items:
+    - "{{groups['bootstrap']}}"
+    - "{{groups['masters']}}"
+    - "{{groups['workers']}}"

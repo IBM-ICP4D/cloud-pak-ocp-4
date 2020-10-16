@@ -1,0 +1,16 @@
+---
+
+- name: Configure global proxy in /etc/profile.d
+  template:
+    src: global_proxy.j2
+    dest: /etc/profile.d/global_proxy.sh
+    mode: 0777
+    owner: root
+    group: root
+  when: configure_global_proxy is defined and configure_global_proxy==True
+
+- name: Remove /etc/profile.d/global_proxy.sh if global proxy must not be set
+  file:
+    path: /etc/profile.d/global_proxy.sh
+    state: absent
+  when: configure_global_proxy is not defined or configure_global_proxy==False

@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Create NFS storage class
+echo "Creating NFS storage class"
+export KUBECONFIG={{ocp_install_dir}}/auth/kubeconfig
+
+oc -n default create -f {{ocp_install_dir}}/nfs-client/nfs-storage-class.yaml
+oc adm policy add-scc-to-user anyuid -z nfs-client-provisioner
+oc adm policy add-scc-to-user hostmount-anyuid -z nfs-client-provisioner
+oc -n default create -f {{ocp_install_dir}}/nfs-client/nfs-storage-class-cluster-role.yaml

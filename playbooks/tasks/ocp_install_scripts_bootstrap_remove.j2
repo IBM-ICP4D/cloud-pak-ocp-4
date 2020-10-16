@@ -1,0 +1,7 @@
+# {{ ansible_managed }}
+
+ansible-playbook -i {{inventory_file}} {{script_dir}}/playbooks/ocp4_remove_bootstrap.yaml \
+  "$@"
+
+echo "Shutting down bootstrap server {{groups['bootstrap'][0]}}"
+ssh -o StrictHostKeyChecking=no core@{{groups['bootstrap'][0]}} 'sudo shutdown -h now &'

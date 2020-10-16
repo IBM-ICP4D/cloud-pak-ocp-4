@@ -1,0 +1,39 @@
+---
+
+- hosts:
+    - masters
+    - workers
+  remote_user: core
+  gather_facts: no
+  tasks:
+    - name: Waiting for cluster nodes to come alive
+      wait_for_connection:
+        sleep: 10
+        timeout: 900
+    - name: Wait for kubelet service to become active
+      service:
+        name: kubelet
+        state: started
+    - name: If run at reboot, wait another 10 minutes to allow the OpenShift services to start
+      pause:
+        seconds: 600
+      when: at_boot is defined and at_boot|bool
+
+- hosts: localhost
+  connection: local
+  tasks:
+
+    - name: Check if control plane certificate has expired
+      shell: |
+        echo | openssl s_client -connect api-int.{{cluster_name}}.{{domain_name}}:6443 2>/dev/null | openssl x509 -checkend 10
+      register: certificate_status
+      failed_when: certificate_status.rc != 1 and certificate_status.rc != 0
+
+    - set_fact:
+        certificate_expired: '{{certificate_status.rc != 0}}'
+      delegate_to: localhost
+      delegate_facts: yes
+
+- import_playbook: tasks/ocp_recover_certificates.yaml
+  when: hostvars.localhost.certificate_expired or (force_recovery is defined and force_recovery|bool)
+

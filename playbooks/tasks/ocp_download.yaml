@@ -1,0 +1,113 @@
+---
+
+- name: Obtain OpenShift packages from URL "{{openshift_base_url}}"
+  shell: |
+    curl -s {{openshift_base_url}} --list-only | grep 'href='
+  register: openshift_packages
+  until: openshift_packages is not failed
+  retries: 10
+  delay: 10
+  args:
+    warn: false
+
+- name: Obtain Red Hat CoreOS packages from URL "{{rhcos_base_url}}"
+  shell: |
+    curl -L -s {{rhcos_base_url}} --list-only | grep 'href='
+  register: rhcos_packages
+  until: rhcos_packages is not failed
+  retries: 10
+  delay: 10
+  args:
+    warn: false
+
+# The below tasks will extract the exact file names from the list of found packages.
+# This is needed because the content of the "latest" directory tends to change without notice.
+- set_fact:
+    openshift_client_package: "{{openshift_packages.stdout | regex_search(vars['openshift_client_package_pattern'],'\\1') | first }}"
+    openshift_installer_package: "{{openshift_packages.stdout | regex_search(vars['openshift_install_package_pattern'],'\\1') | first }}"
+
+- set_fact:
+    rhcos_metal_bios_package: "{{rhcos_packages.stdout | regex_search(vars['rhcos_metal_package_pattern'],'\\1') | first }}"
+    rhcos_iso_package: "{{rhcos_packages.stdout | regex_search(vars['rhcos_iso_package_pattern'],'\\1') | first }}"
+  when: rhcos_installation_method=="pxe"
+
+- set_fact:
+    rhcos_ova_package: "{{rhcos_packages.stdout | regex_search(vars['rhcos_ova_package_pattern'],'\\1') | first }}"
+  when: rhcos_installation_method=="ova"
+
+- name: Download OpenShift client "{{openshift_base_url}}/{{openshift_client_package}}"
+  get_url:
+    url: "{{openshift_base_url}}/{{openshift_client_package}}"
+    dest: "{{ocp_install_dir}}/{{openshift_client_package}}"
+    owner: root
+    mode: 0644
+  register: download_result
+  until: download_result is succeeded
+  retries: 5
+  delay: 30
+
+- name: Download OpenShift installer "{{openshift_base_url}}/{{openshift_installer_package}}"
+  get_url:
+    url: "{{openshift_base_url}}/{{openshift_installer_package}}"
+    dest: "{{ocp_install_dir}}/{{openshift_installer_package}}"
+    owner: root
+    mode: 0644
+  register: download_result
+  until: download_result is succeeded
+  retries: 5
+  delay: 30
+
+- name: Unpack OpenShift client
+  unarchive:
+    src: "{{ocp_install_dir}}/{{openshift_client_package}}"
+    dest: /usr/local/bin
+
+- name: Unpack OpenShift installer
+  unarchive:
+    src: "{{ocp_install_dir}}/{{openshift_installer_package}}"
+    dest: "{{ocp_install_dir}}"
+
+- name: Download CoreOS metal bios "{{rhcos_base_url}}/{{rhcos_metal_bios_package}}"
+  get_url:
+    url: "{{rhcos_base_url}}/{{rhcos_metal_bios_package}}"
+    dest: "{{ocp_install_dir}}/{{rhcos_metal_bios_package}}"
+    owner: root
+    mode: 0644
+  register: download_result
+  until: download_result is succeeded
+  retries: 5
+  when: rhcos_installation_method=="pxe"
+
+- name: Download CoreOS ISO "{{rhcos_base_url}}/{{rhcos_iso_package}}"
+  get_url:
+    url: "{{rhcos_base_url}}/{{rhcos_iso_package}}"
+    dest: "{{ocp_install_dir}}/{{rhcos_iso_package}}"
+    owner: root
+    mode: 0644
+  register: download_result
+  until: download_result is succeeded
+  retries: 3
+  when: rhcos_installation_method=="pxe"
+
+- name: Allow nginx to CoreOS files files (SELinux)
+  sefcontext:
+    target: '{{item}}'
+    setype: httpd_sys_content_t
+    seuser: system_u
+    ftype: a
+    state: present
+  with_items:
+    - "{{ocp_install_dir}}/{{rhcos_metal_bios_package}}"
+    - "{{ocp_install_dir}}/{{rhcos_iso_package}}"
+  when: rhcos_installation_method=="pxe" and ansible_selinux.status=='enabled'
+
+- name: Restore SELinux context for CoreOS files
+  shell: restorecon -Rv "{{ocp_install_dir}}/*"
+
+- name: Download CoreOS OVA package "{{rhcos_base_url}}/{{rhcos_ova_package}}"
+  get_url:
+    url: "{{rhcos_base_url}}/{{rhcos_ova_package}}"
+    dest: "{{ocp_install_dir}}/{{rhcos_ova_package}}"
+    owner: root
+    mode: 0644
+  when: rhcos_installation_method=="ova"

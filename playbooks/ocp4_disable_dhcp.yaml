@@ -1,0 +1,8 @@
+---
+
+- hosts: lb
+  remote_user: root
+  gather_facts: no
+  become: yes
+  tasks:
+    - include: tasks/dns_server_disable_dhcp.yaml
