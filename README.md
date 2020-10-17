@@ -1,6 +1,6 @@
 # Install Red Hat OpenShift 4.x on VMWare or Bare Metal
 
-The instructions in this repository are designed to lay out the Red Hat OpenShift Container Platform (OCP) 4.x on various infrastructures for custom demos and POCs of the IBM Cloud Paks.
+The instructions in this repository are designed to lay out the Red Hat OpenShift Container Platform (OCP) 4.x on various infrastructures for custom demos and POCs of the IBM Cloud Paks. It is intended for those who want to fasttrack installing OpenShift with some tried and tested automation. It saved several IBM-ers numerous hours everytime they need to set up a cluster to do Cloud Pak demos.
 
 **IMPORTANT NOTE: It is not intended for this repository to configure and deploy OpenShift or a Cloud Pak for production use.**
 
