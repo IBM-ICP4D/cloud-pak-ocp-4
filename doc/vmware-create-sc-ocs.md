@@ -3,9 +3,7 @@
 Using steps found here: https://access.redhat.com/documentation/en-us/red_hat_openshift_container_storage/4.5/html/deploying_openshift_container_storage_on_vmware_vsphere/deploy-using-local-storage-devices-vmware.
 
 ## Pre-requisites
-The steps in this document assume you have 3 (dedicated) worker nodes in the cluster, each with:
-- 10 GB raw disk (for MON)
-- Additional large raw disk (for Ceph). In the example below the disks are sized 200 GB
+The steps in this document assume you have 3 (dedicated) worker nodes in the cluster, each with one additional large raw disk (for Ceph). In the example below the disks are sized 200 GB
 
 ## Log in to OpenShift
 ```
