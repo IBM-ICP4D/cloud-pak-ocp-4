@@ -12,9 +12,11 @@ oc login -u admin -p passw0rd
 
 ## Add labels to the workers
 ```
-oc label nodes worker-1.ocp43.uk.ibm.com cluster.ocs.openshift.io/openshift-storage="" --overwrite
-oc label nodes worker-2.ocp43.uk.ibm.com cluster.ocs.openshift.io/openshift-storage="" --overwrite
-oc label nodes worker-3.ocp43.uk.ibm.com cluster.ocs.openshift.io/openshift-storage="" --overwrite
+ocs_nodes='worker-4.ocp45.uk.ibm.com worker-5.ocp45.uk.ibm.com worker-6.ocp45.uk.ibm.com"
+for ocs_node in $ocs_nodes;do
+  oc label nodes $ocs_node cluster.ocs.openshift.io/openshift-storage="" --overwrite
+  oc label nodes $ocs_node node-role.kubernetes.io/infra="" --overwrite
+done
 ```
 
 ## Install OCS operator
@@ -28,6 +30,10 @@ You can install the operator using the OpenShift console.
 - Select `Installed namespace`, namespace `openshift-storage` will be created automatically
 - Update channel: stable-4.5
 
+### Annotate namespace
+```
+oc annotate namespace openshift-storage openshift.io/node-selector=
+```
 
 ## Create namespace for local storage
 ```
@@ -54,11 +60,11 @@ watch -n 5 "oc get po -n local-storage"
 ## Create storage class for the Ceph file system
 The `devicePaths` should list the path to the large disks that will be used for the data.
 ```
-cat << EOF > /tmp/local-storage-block.yaml
+cat << EOF > /tmp/localblock.yaml
 apiVersion: local.storage.openshift.io/v1
 kind: LocalVolume
 metadata:
-  name: local-block
+  name: localblock
   namespace: local-storage
   labels:
     app: ocs-storagecluster
@@ -77,7 +83,7 @@ spec:
         - /dev/sdb
 EOF
 
-oc apply -f /tmp/local-storage-block.yaml
+oc apply -f /tmp/localblock.yaml
 ```
 
 Wait until PVs for `localblock` storage class have been created; each PV is 200 GB.
