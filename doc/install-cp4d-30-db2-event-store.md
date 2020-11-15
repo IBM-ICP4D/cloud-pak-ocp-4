@@ -12,8 +12,6 @@ es_nodes="worker-4.ocp43.uk.ibm.com worker-5.ocp43.uk.ibm.com worker-6.ocp43.uk.
 ```
 for node_name in $es_nodes;do
   oc adm taint node $node_name icp4data=database-db2eventstore:NoSchedule --overwrite
-  kubectl drain $node_name --ignore-daemonsets --delete-local-data
-  kubectl uncordon $node_name
   oc label node $node_name icp4data=database-db2eventstore --overwrite
   oc label node $node_name node-role.db2eventstore.ibm.com/control=true --overwrite
 done
@@ -25,9 +23,10 @@ oc get no -l icp4data=database-db2eventstore
 ```
 
 ### Format Event Store local disks
+We will use logical volumes to make it easier to expand if needed.
 ```
 for es_node in $es_nodes;do
-  ssh core@$es_node 'sudo mkfs.xfs /dev/sdb'
+  ssh core@$es_node 'sudo pvcreate /dev/sdb;sudo vgcreate es /dev/sdb;sudo lvcreate -l 100%FREE -n es_local es;sudo mkfs.xfs /dev/es/es_local'
 done
 ```
 
@@ -69,7 +68,7 @@ spec:
             [Service]
             Type=oneshot
             ExecStartPre=/usr/bin/mkdir -p /mnt/es_local
-            ExecStart=/usr/bin/mount /dev/sdb /mnt/es_local
+            ExecStart=/usr/bin/mount /dev/es/es /mnt/es_local
             [Install]
             WantedBy=muti-user.target
           name: es-local-mount.service
