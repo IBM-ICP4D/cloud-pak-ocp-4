@@ -16,7 +16,14 @@ ocs_nodes='worker-4.ocp45.uk.ibm.com worker-5.ocp45.uk.ibm.com worker-6.ocp45.uk
 for ocs_node in $ocs_nodes;do
   oc label nodes $ocs_node cluster.ocs.openshift.io/openshift-storage="" --overwrite
   oc label nodes $ocs_node node-role.kubernetes.io/infra="" --overwrite
+  oc label nodes $ocs_node node-role.kubernetes.io/worker-
 done
+```
+
+## Create namespace for OCS operator
+To make sure that the OCS operator only runs on the infra nodes, create the project beforehand and annotate it such that only the infra nodes will be selected.
+```
+oc adm new-project openshift-storage --node-selector='cluster.ocs.openshift.io/openshift-storage='
 ```
 
 ## Install OCS operator
@@ -30,14 +37,9 @@ You can install the operator using the OpenShift console.
 - Select `Installed namespace`, namespace `openshift-storage` will be created automatically
 - Update channel: stable-4.5
 
-### Annotate namespace
-```
-oc annotate namespace openshift-storage openshift.io/node-selector=
-```
-
 ## Create namespace for local storage
 ```
-oc new-project local-storage
+oc adm new-project local-storage --node-selector='cluster.ocs.openshift.io/openshift-storage='
 ```
 
 ## Install local storage operator
