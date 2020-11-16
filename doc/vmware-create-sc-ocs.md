@@ -1,6 +1,6 @@
 # Setting up OCS on an OCP 4.x installation provisioned on VMWare
 
-Using steps found here: https://access.redhat.com/documentation/en-us/red_hat_openshift_container_storage/4.5/html/deploying_openshift_container_storage_on_vmware_vsphere/deploy-using-local-storage-devices-vmware.
+Using steps found here: https://access.redhat.com/documentation/en-us/red_hat_openshift_container_storage/4.5/html/deploying_openshift_container_storage_on_vmware_vsphere/deploy-using-local-storage-devices-vmware and here https://red-hat-storage.github.io/ocs-training/training/ocs4/ocs-localdevice-blog.html (for the infra nodes steps).
 
 ## Pre-requisites
 The steps in this document assume you have 3 (dedicated) worker nodes in the cluster, each with one additional large raw disk (for Ceph). In the example below the disks are sized 200 GB
@@ -16,7 +16,7 @@ ocs_nodes='worker-4.ocp45.uk.ibm.com worker-5.ocp45.uk.ibm.com worker-6.ocp45.uk
 for ocs_node in $ocs_nodes;do
   oc label nodes $ocs_node cluster.ocs.openshift.io/openshift-storage="" --overwrite
   oc label nodes $ocs_node node-role.kubernetes.io/infra="" --overwrite
-  oc label nodes $ocs_node node-role.kubernetes.io/worker-
+  oc adm taint nodes $ocs_node node.ocs.openshift.io/storage="true":NoSchedule
 done
 ```
 
@@ -30,6 +30,21 @@ You can install the operator using the OpenShift console.
 - Install
 - Select `Installed namespace`, namespace `openshift-storage` will be created automatically
 - Update channel: stable-4.5
+
+### Wait until the pods are running
+```
+watch -n 5 "oc get po -n openshift-storage"
+```
+
+Expected output:
+```
+Every 5.0s: oc get po -n openshift-storage
+
+NAME                                 READY   STATUS    RESTARTS   AGE
+noobaa-operator-69bb7cd87d-hdnt6     1/1     Running   0          75m
+ocs-operator-6b66b56cf8-xbhgj        1/1     Running   0          75m
+rook-ceph-operator-d9cccc9bc-mmf4z   1/1     Running   0          75m
+```
 
 ## Create namespace for local storage
 ```
@@ -48,7 +63,7 @@ You can install the operator using the OpenShift console.
 - Update channel: 4.5
 
 
-## Wait until the operator is running
+### Wait until the operator is running
 ```
 watch -n 5 "oc get po -n local-storage"
 ```
@@ -65,6 +80,10 @@ metadata:
   labels:
     app: ocs-storagecluster
 spec:
+  tolerations:
+  - key: "node.ocs.openshift.io/storage"
+    value: "true"
+    effect: NoSchedule
   nodeSelector:
     nodeSelectorTerms:
     - matchExpressions:
@@ -85,21 +104,6 @@ oc apply -f /tmp/localblock.yaml
 Wait until PVs for `localblock` storage class have been created; each PV is 200 GB.
 ```
 watch -n 5 'oc get pv'
-```
-
-## Wait until the pods are running
-```
-watch -n 5 "oc get po -n openshift-storage"
-```
-
-Expected output:
-```
-Every 5.0s: oc get po -n openshift-storage
-
-NAME                                 READY   STATUS    RESTARTS   AGE
-noobaa-operator-69bb7cd87d-hdnt6     1/1     Running   0          75m
-ocs-operator-6b66b56cf8-xbhgj        1/1     Running   0          75m
-rook-ceph-operator-d9cccc9bc-mmf4z   1/1     Running   0          75m
 ```
 
 ## Create storage cluster
