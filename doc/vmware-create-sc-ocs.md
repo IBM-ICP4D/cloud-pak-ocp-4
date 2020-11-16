@@ -20,12 +20,6 @@ for ocs_node in $ocs_nodes;do
 done
 ```
 
-## Create namespace for OCS operator
-To make sure that the OCS operator only runs on the infra nodes, create the project beforehand and annotate it such that only the infra nodes will be selected.
-```
-oc adm new-project openshift-storage --node-selector='cluster.ocs.openshift.io/openshift-storage='
-```
-
 ## Install OCS operator
 You can install the operator using the OpenShift console.
 
@@ -39,7 +33,7 @@ You can install the operator using the OpenShift console.
 
 ## Create namespace for local storage
 ```
-oc adm new-project local-storage --node-selector='cluster.ocs.openshift.io/openshift-storage='
+oc adm new-project local-storage
 ```
 
 ## Install local storage operator
