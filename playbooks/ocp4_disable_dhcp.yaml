@@ -1,6 +1,6 @@
 ---
 
-- hosts: lb
+- hosts: bastion
   remote_user: root
   gather_facts: no
   become: yes
