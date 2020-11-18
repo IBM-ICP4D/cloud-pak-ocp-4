@@ -35,12 +35,13 @@ If you want the output to be a bit more verbose, especially while waiting for th
 
 ## Remove bootstrap from load balancer
 Now that the control plane has been started, the bootstrap is no longer needed. Execute the following step to remove the references to the bootstrap node from the load balancer and shut down the bootstrap node. After that you can remove the bootstrap VM from within vSphere.
+> If you're not managing the load balancer from/on the bastion node, you have to manually remove or comment out the bootstrap entries.
 ```
 /ocp_install/scripts/remove_bootstrap.sh
 ```
 
 ## Approve Certificate Signing Requests and wait for nodes to become ready
-With OpenShift 4.3, the CSRs of the workers are automatically approved but in 4.4 this has changed. Run the following to approve CSRs of the workers and wait for the nodes to become Ready:
+Run the following to approve CSRs of the workers and wait for the nodes to become Ready.
 ```
 /ocp_install/scripts/wait_nodes_ready.sh
 ```
