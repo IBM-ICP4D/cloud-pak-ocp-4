@@ -17,16 +17,42 @@
       ignore_errors: true
 
 - hosts:
-    - lb
-    - nfs
     - bastion
   remote_user: root
   gather_facts: no
   become: yes
 
   tasks:
-    - name: Configure host for password-less SSH
+    - name: Configure host for password-less SSH for bastion node
       authorized_key:
         user: root
         state: present
         key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+
+- hosts:
+    - nfs
+  remote_user: root
+  gather_facts: no
+  become: yes
+
+  tasks:
+    - name: Configure host for password-less SSH for NFS node
+      authorized_key:
+        user: root
+        state: present
+        key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+      when: manage_nfs|bool
+
+- hosts:
+    - lb
+  remote_user: root
+  gather_facts: no
+  become: yes
+
+  tasks:
+    - name: Configure host for password-less SSH for load balancer
+      authorized_key:
+        user: root
+        state: present
+        key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+      when: manage_load_balancer is not defined or manage_load_balancer|bool

@@ -86,6 +86,13 @@ dhcp_on_bastion=True
 dhcp_range=['10.99.92.51','10.99.92.60']
 
 #
+# Indicate whether the load balancer must be configured by the prepare script. If you choose to use an external load
+# balancer, set the manage_load_balancer property to False. You can still configure the load balancer under the [lb]
+# section.
+#
+manage_load_balancer=True
+
+#
 # Indicate the port that the HTTP server (nginx) on the bastion node will listen on. The HTTP server provides access
 # to the ignition files required at boot time of the bootstrap, masters and workers, as well as PXE boot assets such as
 # RHCOS ISO.
@@ -106,10 +113,12 @@ setup_desktop=False
 # command; you can specify the size (such as 500G) or any unique string that identifies
 # the device (such as sdb).
 #
-# The "nfs_volume_mount_path" indicates the mount point that is created for the device.
+# The "nfs_volume_mount_path" indicates the mount point that is created for the device. Even if you are not managing NFS
+# yourself, but are using an external NFS server for NFS storge class, you should configure the path that must be mounted.
 #
 manage_nfs=True
 nfs_volume_selector="sdb"
+
 nfs_volume_mount_path="/nfs"
 
 #

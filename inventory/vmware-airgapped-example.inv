@@ -97,6 +97,13 @@ dhcp_on_bastion=True
 dhcp_range=['10.99.92.51','10.99.92.60']
 
 #
+# Indicate whether the load balancer must be configured by the prepare script. If you choose to use an external load
+# balancer, set the manage_load_balancer property to False. You can still configure the load balancer under the [lb]
+# section.
+#
+manage_load_balancer=True
+
+#
 # Indicate the port that the HTTP server (nginx) on the bastion node will listen on. The HTTP server provides access
 # to the ignition files required at boot time of the bootstrap, masters and workers, as well as PXE boot assets such as
 # RHCOS ISO.

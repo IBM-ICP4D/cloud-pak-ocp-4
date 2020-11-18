@@ -6,3 +6,4 @@
   become: yes
   tasks:
     - include: tasks/haproxy_remove_bootstrap.yaml
+      when: manage_load_balancer is not defined or manage_load_balancer|bool
