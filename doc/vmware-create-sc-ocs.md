@@ -125,5 +125,12 @@ watch -n 5 'oc get pod -n openshift-storage'
 
 Wait until the OCS operator pod `ocs-operator-xxxxxxxx-yyyyy` is running with READY=`1/1`. You will see more than 20 pods starting in the `openshift-storage` namespace.
 
+## Add universal toleration to CSI plug-ins
+If you install any components which require nodes to be tainted (such as Db2 Event Store), you need to add universal toleration to the OCS DaemonSets, as documented here: https://access.redhat.com/solutions/5061861.
+```
+oc patch ds csi-cephfsplugin -n openshift-storage  --type=merge -p '{"spec": {"template": { "spec": {"tolerations":[{"operator":"Exists"}]}}}}'
+oc patch ds csi-rbdplugin -n openshift-storage  --type=merge -p '{"spec": {"template": { "spec": {"tolerations":[{"operator":"Exists"}]}}}}'
+```
+
 ## Record name of storage class(es)
 Now that the OCS operator has been created you should have a `ocs-storagecluster-cephfs` storage class which you can use for the internal image registry and other purposes.
