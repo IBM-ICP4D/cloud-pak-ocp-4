@@ -35,10 +35,12 @@
 - name: Create NFS storage class
   shell: |
     {{ocp_install_dir}}/scripts/create_nfs_sc.sh
+  when: create_nfs_sc|bool
 
-- name: Configure image registry storage
+- name: Configure image registry storage (only when NFS)
   shell: |
     {{ocp_install_dir}}/scripts/create_registry_storage.sh
+  when: create_nfs_sc|bool
 
 - name: Post-install
   shell: |
