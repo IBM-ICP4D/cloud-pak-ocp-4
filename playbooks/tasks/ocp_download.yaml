@@ -27,9 +27,17 @@
     openshift_installer_package: "{{openshift_packages.stdout | regex_search(vars['openshift_install_package_pattern'],'\\1') | first }}"
 
 - set_fact:
-    rhcos_metal_bios_package: "{{rhcos_packages.stdout | regex_search(vars['rhcos_metal_package_pattern'],'\\1') | first }}"
-    rhcos_iso_package: "{{rhcos_packages.stdout | regex_search(vars['rhcos_iso_package_pattern'],'\\1') | first }}"
+    rhcos_kernel_package: "{{rhcos_packages.stdout | regex_search(vars['rhcos_kernel_package_pattern'],'\\1') | first }}"
+    rhcos_initramfs_package: "{{rhcos_packages.stdout | regex_search(vars['rhcos_initramfs_package_pattern'],'\\1') | first }}"
   when: rhcos_installation_method=="pxe"
+
+- set_fact:
+    rhcos_metal_bios_package: "{{rhcos_packages.stdout | regex_search(vars['rhcos_metal_package_pattern'],'\\1') | first }}"
+  when: (rhcos_installation_method=="pxe") and (openshift_release < "4.6")
+
+- set_fact:
+    rhcos_rootfs_package: "{{rhcos_packages.stdout | regex_search(vars['rhcos_rootfs_package_pattern'],'\\1') | first }}"
+  when: (rhcos_installation_method=="pxe") and (openshift_release >= "4.6")
 
 - set_fact:
     rhcos_ova_package: "{{rhcos_packages.stdout | regex_search(vars['rhcos_ova_package_pattern'],'\\1') | first }}"
@@ -76,12 +84,23 @@
   register: download_result
   until: download_result is succeeded
   retries: 5
-  when: rhcos_installation_method=="pxe"
+  when: (rhcos_installation_method=="pxe") and (openshift_release < "4.6")
 
-- name: Download CoreOS ISO "{{rhcos_base_url}}/{{rhcos_iso_package}}"
+# - name: Download CoreOS ISO "{{rhcos_base_url}}/{{rhcos_iso_package}}"
+#   get_url:
+#     url: "{{rhcos_base_url}}/{{rhcos_iso_package}}"
+#     dest: "{{ocp_install_dir}}/{{rhcos_iso_package}}"
+#     owner: root
+#     mode: 0644
+#   register: download_result
+#   until: download_result is succeeded
+#   retries: 3
+#   when: rhcos_installation_method=="pxe"
+
+- name: Download kernel package "{{rhcos_base_url}}/{{rhcos_kernel_package}}"
   get_url:
-    url: "{{rhcos_base_url}}/{{rhcos_iso_package}}"
-    dest: "{{ocp_install_dir}}/{{rhcos_iso_package}}"
+    url: "{{rhcos_base_url}}/{{rhcos_kernel_package}}"
+    dest: "{{ocp_install_dir}}/{{rhcos_kernel_package}}"
     owner: root
     mode: 0644
   register: download_result
@@ -89,7 +108,41 @@
   retries: 3
   when: rhcos_installation_method=="pxe"
 
-- name: Allow nginx to CoreOS files files (SELinux)
+- name: Download initial RAM disk package "{{rhcos_base_url}}/{{rhcos_initramfs_package}}"
+  get_url:
+    url: "{{rhcos_base_url}}/{{rhcos_initramfs_package}}"
+    dest: "{{ocp_install_dir}}/{{rhcos_initramfs_package}}"
+    owner: root
+    mode: 0644
+  register: download_result
+  until: download_result is succeeded
+  retries: 3
+  when: rhcos_installation_method=="pxe"
+
+- name: Download root file system package "{{rhcos_base_url}}/{{rhcos_rootfs_package}}" for OpenShift 4.6 and higher
+  get_url:
+    url: "{{rhcos_base_url}}/{{rhcos_rootfs_package}}"
+    dest: "{{ocp_install_dir}}/{{rhcos_rootfs_package}}"
+    owner: root
+    mode: 0644
+  register: download_result
+  until: download_result is succeeded
+  retries: 3
+  when: (rhcos_installation_method=="pxe") and (openshift_release >= "4.6")
+
+- name: Allow nginx to access CoreOS kernel and initramfs files (SELinux)
+  sefcontext:
+    target: '{{item}}'
+    setype: httpd_sys_content_t
+    seuser: system_u
+    ftype: a
+    state: present
+  with_items:
+    - "{{ocp_install_dir}}/{{rhcos_kernel_package}}"
+    - "{{ocp_install_dir}}/{{rhcos_initramfs_package}}"
+  when: rhcos_installation_method=="pxe" and ansible_selinux.status=='enabled'
+
+- name: Allow nginx to access CoreOS metal BIOS file (SELinux)
   sefcontext:
     target: '{{item}}'
     setype: httpd_sys_content_t
@@ -98,8 +151,18 @@
     state: present
   with_items:
     - "{{ocp_install_dir}}/{{rhcos_metal_bios_package}}"
-    - "{{ocp_install_dir}}/{{rhcos_iso_package}}"
-  when: rhcos_installation_method=="pxe" and ansible_selinux.status=='enabled'
+  when: rhcos_installation_method=="pxe" and ansible_selinux.status=='enabled' and openshift_release < "4.6"
+
+- name: Allow nginx to access CoreOS root file system file (SELinux)
+  sefcontext:
+    target: '{{item}}'
+    setype: httpd_sys_content_t
+    seuser: system_u
+    ftype: a
+    state: present
+  with_items:
+    - "{{ocp_install_dir}}/{{rhcos_rootfs_package}}"
+  when: rhcos_installation_method=="pxe" and ansible_selinux.status=='enabled' and openshift_release >= "4.6"
 
 - name: Restore SELinux context for CoreOS files
   shell: restorecon -Rv "{{ocp_install_dir}}/*"

@@ -15,6 +15,45 @@
     src: "{{ocp_install_dir}}/manifests/cluster-scheduler-02-config.yml"
     dest: /tmp/cluster-scheduler-02-config.yml
 
+- name: Get the chrony client configuration
+  slurp:
+    src: "{{ocp_install_dir}}/chrony_client.conf"
+  register: chrony_client_conf
+
+- name: Create Machine Config for chrony
+  template:
+    src: ocp_ignition_chrony.j2
+    dest: "{{ocp_install_dir}}/openshift/40_{{item}}s_ocp_chrony_configuration.yaml"
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - "master"
+    - "worker"
+  vars:
+    node_type: "{{item}}"
+  when: override_chrony_settings_on_cluster_nodes|bool
+
+- name: Get the global proxy configuration (if defined)
+  slurp:
+    src: "/etc/profile.d/global_proxy.sh"
+  register: global_proxy_conf
+  when: configure_global_proxy is defined and configure_global_proxy==True
+
+- name: Create Machine Config for global proxy
+  template:
+    src: ocp_ignition_proxy.j2
+    dest: "{{ocp_install_dir}}/openshift/40_{{item}}s_ocp_proxy_configuration.yaml"
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - "master"
+    - "worker"
+  vars:
+    node_type: "{{item}}"
+  when: configure_global_proxy is defined and configure_global_proxy==True
+
 - name: Create OpenShift ignition configurations
   shell: |
     {{ocp_install_dir}}/openshift-install create ignition-configs --dir={{ocp_install_dir}}
@@ -29,47 +68,6 @@
     - "{{ocp_install_dir}}/bootstrap.ign"
     - "{{ocp_install_dir}}/master.ign"
     - "{{ocp_install_dir}}/worker.ign"
-
-- name: Get the chrony client configuration
-  slurp:
-    src: "{{ocp_install_dir}}/chrony_client.conf"
-  register: chrony_client_conf
-
-- name: Get the global proxy configuration (if defined)
-  slurp:
-    src: "/etc/profile.d/global_proxy.sh"
-  register: global_proxy_conf
-  when: configure_global_proxy is defined and configure_global_proxy==True
-
-- name: Generate ignition file for the bootstrap
-  template:
-    src: ocp_ignition.j2
-    dest: "{{ocp_install_dir}}/{{cluster_name}}-bootstrap.ign"
-    owner: root
-    group: root
-    mode: 0644
-  vars:
-    - node_type: bootstrap
-
-- name: Generate ignition files for the masters
-  template:
-    src: ocp_ignition.j2
-    dest: "{{ocp_install_dir}}/{{cluster_name}}-master.ign"
-    owner: root
-    group: root
-    mode: 0644
-  vars:
-    - node_type: master
-
-- name: Generate ignition files for the workers
-  template:
-    src: ocp_ignition.j2
-    dest: "{{ocp_install_dir}}/{{cluster_name}}-worker.ign"
-    owner: root
-    group: root
-    mode: 0644
-  vars:
-    - node_type: worker
 
 - name: Allow nginx to read ignition files (SELinux)
   sefcontext:
@@ -88,6 +86,6 @@
     content: "{{ lookup('file',item) | b64encode }}"
     dest: "{{item}}.64"
   with_items:
-    - "{{ocp_install_dir}}/{{cluster_name}}-bootstrap.ign"
-    - "{{ocp_install_dir}}/{{cluster_name}}-master.ign"
-    - "{{ocp_install_dir}}/{{cluster_name}}-worker.ign"
+    - "{{ocp_install_dir}}/bootstrap.ign"
+    - "{{ocp_install_dir}}/master.ign"
+    - "{{ocp_install_dir}}/worker.ign"
