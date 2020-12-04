@@ -188,14 +188,14 @@ vm_worker_disk=200
 10.99.92.50 host="bastion"
 
 [bootstrap]
-10.99.92.51 host="bootstrap" mac="00:50:56:ab:c3:c2"
+10.99.92.51 host="bootstrap" mac="xx:xx:xx:xx:xx:xx"
 
 [masters]
-10.99.92.52 host="master-1" mac="00:50:56:ab:36:9b"
-10.99.92.53 host="master-2" mac="00:50:56:ab:d2:bc"
-10.99.92.54 host="master-3" mac="00:50:56:ab:a2:d6"
+10.99.92.52 host="master-1" mac="xx:xx:xx:xx:xx:xx"
+10.99.92.53 host="master-2" mac="xx:xx:xx:xx:xx:xx"
+10.99.92.54 host="master-3" mac="xx:xx:xx:xx:xx:xx"
 
 [workers]
-10.99.92.55 host="worker-1" mac="00:50:56:ab:1f:3f"
-10.99.92.56 host="worker-2" mac="00:50:56:ab:1a:2c"
-10.99.92.57 host="worker-3" mac="00:50:56:ab:2e:c8"
+10.99.92.55 host="worker-1" mac="xx:xx:xx:xx:xx:xx"
+10.99.92.56 host="worker-2" mac="xx:xx:xx:xx:xx:xx"
+10.99.92.57 host="worker-3" mac="xx:xx:xx:xx:xx:xx"
