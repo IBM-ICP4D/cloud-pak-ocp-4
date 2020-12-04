@@ -1,3 +1,4 @@
+{% if openshift_release < "4.6" %}
 apiVersion: machineconfiguration.openshift.io/v1
 kind: MachineConfig
 metadata:
@@ -11,11 +12,33 @@ spec:
       security:
         tls: {}
       timeouts: {}
-{% if openshift_release < "4.6" %}
       version: 2.2.0
-{% else %}
-      version: 3.1.0
+    networkd: {}
+    passwd: {}
+    storage:
+      files:
+      - contents:
+          source: "data:text/plain;charset=utf-8;base64,{{chrony_client_conf['content']}}"
+        filesystem: root
+        mode: 420
+        path: /etc/chrony.conf
+  osImageURL: ""
 {% endif %}
+{% if openshift_release >= "4.6" %}
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: {{node_type}}
+  name: 40-{{node_type}}s-chrony-configuration
+spec:
+  config:
+    ignition:
+      config: {}
+      security:
+        tls: {}
+      timeouts: {}
+      version: 3.1.0
     networkd: {}
     passwd: {}
     storage:
@@ -26,3 +49,4 @@ spec:
         overwrite: true
         path: /etc/chrony.conf
   osImageURL: ""
+{% endif %}
