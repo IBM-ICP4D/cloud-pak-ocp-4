@@ -6,13 +6,42 @@
     patterns: "{{rhcos_metal_package_pattern}}"
     use_regex: yes
   register: found_metal_files
+  when: openshift_release < "4.6"
 
-- name: Find CoreOS installer ISO
+- name: Find CoreOS kernel
   find:
     paths: "{{ocp_install_dir}}"
-    patterns: "{{rhcos_iso_package_pattern}}"
+    patterns: "{{rhcos_kernel_package_pattern}}"
     use_regex: yes
-  register: found_iso_files
+  register: found_kernel_files
+
+- name: Find initial RAM disk package
+  find:
+    paths: "{{ocp_install_dir}}"
+    patterns: "{{rhcos_initramfs_package_pattern}}"
+    use_regex: yes
+  register: found_initramfs_files
+
+- name: Find root file system package
+  find:
+    paths: "{{ocp_install_dir}}"
+    patterns: "{{rhcos_rootfs_package_pattern}}"
+    use_regex: yes
+  register: found_rootfs_files
+  when: openshift_release >= "4.6"
+
+- set_fact:
+    rhcos_kernel_package: "{{(found_kernel_files.files | last)['path']}}" 
+    rhcos_initramfs_package: "{{(found_initramfs_files.files | last)['path']}}" 
+
+- set_fact:
+    rhcos_metal_bios_package: "{{(found_metal_files.files | last)['path']}}" 
+  when: openshift_release < "4.6"
+
+- set_fact:
+    rhcos_rootfs_package: "{{(found_rootfs_files.files | last)['path']}}" 
+  when: openshift_release >= "4.6"
+
 
 - name: Create TFTP directory
   file:
@@ -42,13 +71,17 @@
     path: "{{ocp_install_dir}}/tftpboot/images"
     state: directory
 
-- name: Extract kernel and ramdisk from ISO {{(found_iso_files.files | last)['path']}}
-  iso_extract:
-    image: "{{(found_iso_files.files | last)['path']}}"
-    dest: "{{ocp_install_dir}}/tftpboot/images/"
-    files:
-    - images/vmlinuz
-    - images/initramfs.img
+- name: Copy kernel package "{{rhcos_kernel_package}}" to TFTP
+  copy:
+    src: "{{rhcos_kernel_package}}"
+    dest: "{{ocp_install_dir}}/tftpboot/images/{{rhcos_kernel_package | basename}}"
+    remote_src: True
+
+- name: Copy initial RAM file system package "{{rhcos_initramfs_package}}" to TFTP
+  copy:
+    src: "{{rhcos_initramfs_package}}"
+    dest: "{{ocp_install_dir}}/tftpboot/images/{{rhcos_initramfs_package | basename}}"
+    remote_src: True
 
 - name: Create TFTP configuration directory
   file:

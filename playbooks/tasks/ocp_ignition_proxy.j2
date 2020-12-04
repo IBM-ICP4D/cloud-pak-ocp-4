@@ -1,0 +1,52 @@
+{% if openshift_release < "4.6" %}
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: {{node_type}}
+  name: 40-{{node_type}}s-proxy-configuration
+spec:
+  config:
+    ignition:
+      config: {}
+      security:
+        tls: {}
+      timeouts: {}
+      version: 2.2.0
+    networkd: {}
+    passwd: {}
+    storage:
+      files:
+      - contents:
+          source: "data:text/plain;charset=utf-8;base64,{{global_proxy_conf['content']}}"
+        filesystem: root
+        mode: 420
+        path: /etc/profile.d/global_proxy.sh
+  osImageURL: ""
+{% endif %}
+{% if openshift_release >= "4.6" %}
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: {{node_type}}
+  name: 40-{{node_type}}s-proxy-configuration
+spec:
+  config:
+    ignition:
+      config: {}
+      security:
+        tls: {}
+      timeouts: {}
+      version: 3.1.0
+    networkd: {}
+    passwd: {}
+    storage:
+      files:
+      - contents:
+          source: "data:text/plain;charset=utf-8;base64,{{global_proxy_conf['content']}}"
+        mode: 420
+        overwrite: true
+        path: /etc/profile.d/global_proxy.sh
+  osImageURL: ""
+{% endif %}
