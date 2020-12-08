@@ -24,10 +24,6 @@
   shell: |
     {{ocp_install_dir}}/scripts/wait_install.sh
 
-- name: Disable DHCP
-  shell: |
-    {{ocp_install_dir}}/scripts/disable_dhcp.sh
-
 - name: Wait for cluster operators to become ready
   shell: |
     {{ocp_install_dir}}/scripts/wait_co_ready.sh

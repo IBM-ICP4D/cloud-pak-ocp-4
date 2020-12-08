@@ -81,12 +81,6 @@ INFO Login to the console with user: kubeadmin, password: Fo9wP-taw47-6ujnV-jwT2
 
 **Please note that the above output renders the `kubeadmin` password**
 
-## Disable DHCP server
-After the workers have been deployed, you no longer need the DHCP server that is running on the bastion node. To avoid any conflicts with other activities on the VMWare infrastructure, you can now disable the DHCP service within  `dnsmasq`.
-```
-/ocp_install/scripts/disable_dhcp.sh
-```
-
 ## Wait for all cluster operators to become ready
 To wait for the cluster operators to become ready, run the following script:
 ```

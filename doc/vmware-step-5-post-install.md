@@ -12,6 +12,12 @@ Amongst others, the script may opt the cluster out from remote health checking. 
 /ocp_install/scripts/wait_co_ready.sh
 ```
 
+## Optional: Disable DHCP server
+After the workers have been deployed, you may no longer need the DHCP server that is running on the bastion node. To avoid any conflicts with other activities on the VMWare infrastructure, you can now disable the DHCP service within  `dnsmasq`.
+```
+/ocp_install/scripts/disable_dhcp.sh
+```
+
 ## Keep the cluster running for 24h
 > **IMPORTANT:** After completing the OpenShift 4.x installation, ensure that you keep the cluster running for at least 24 hours. This is required to renew the temporary control plane certificates. If you shut down the cluster nodes before the control plane certificates are renewed and they expire while the cluster is down, you will not be able to access OpenShift.
 
