@@ -17,7 +17,7 @@ srv-host=_etcd-server-ssl._tcp.{{cluster_name}}.{{domain_name}},etcd-2.{{cluster
 
 {% if dhcp_on_bastion %}
 domain={{cluster_name}}.{{domain_name}}
-dhcp-range={{dhcp_range[0]}},{{dhcp_range[1]}}
+dhcp-range={{dhcp_range[0]}},{{dhcp_range[1]}},infinite
 dhcp-option=3,{{default_gateway}}
 
 {% for host in groups['masters'] | sort %}
