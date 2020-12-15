@@ -19,7 +19,7 @@ NAME         PROVISIONER       AGE
 nfs-client   icpd-nfs.io/nfs   4m18s
 ```
 
-### Create OpenShift Contain Storage - Ceph
+### Create OpenShift Container Storage - Ceph
 As from version 4 of OpenShift, OpenShift Container Storage implements Ceph, a software defined storage (SDS) solution that has been available as a storage backend for Kubernetes and OpenStack for a number of years. OCS/Ceph provides a distributed file system that can handle node failures and also has better performance characteristics than NFS.
 
 On the demo infrastructure, an empty raw volume has been created on the worker nodes. This can be used to deploy OCS.
