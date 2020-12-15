@@ -1,11 +1,11 @@
-# Install EDb2 Event Store
+# Install Db2 Event Store
 This document lists the steps to configure a Cloud pak for Data cluster to include the Db2 Event Store. Special steps are needed to taint the nodes, prepare the local volumes and ensure they are mounted at boot.
 
 ## Configure nodes for Db2 Event Store
 
 ### Specify 3 event store nodes
 ```
-es_nodes="worker-4.ocp43.uk.ibm.com worker-5.ocp43.uk.ibm.com worker-6.ocp43.uk.ibm.com"
+es_nodes="es-1.ocp45.uk.ibm.com es-2.ocp45.uk.ibm.com es-3.ocp45.uk.ibm.com"
 ```
 
 ### Taint and label the nodes
@@ -68,7 +68,7 @@ spec:
             [Service]
             Type=oneshot
             ExecStartPre=/usr/bin/mkdir -p /mnt/es_local
-            ExecStart=/usr/bin/mount /dev/es/es /mnt/es_local
+            ExecStart=/usr/bin/mount /dev/es/es_local /mnt/es_local
             [Install]
             WantedBy=muti-user.target
           name: es-local-mount.service

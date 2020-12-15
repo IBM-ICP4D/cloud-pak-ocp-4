@@ -12,7 +12,7 @@ oc login -u admin -p passw0rd
 
 ## Add labels to the workers
 ```
-ocs_nodes='worker-4.ocp45.uk.ibm.com worker-5.ocp45.uk.ibm.com worker-6.ocp45.uk.ibm.com"
+ocs_nodes='ocs-1.ocp45.uk.ibm.com ocs-2.ocp45.uk.ibm.com ocs-3.ocp45.uk.ibm.com"
 for ocs_node in $ocs_nodes;do
   oc label nodes $ocs_node cluster.ocs.openshift.io/openshift-storage="" --overwrite
   oc label nodes $ocs_node node-role.kubernetes.io/infra="" --overwrite
@@ -28,8 +28,9 @@ You can install the operator using the OpenShift console.
 - Go to Administrator --> Operators --> OperatorHub
 - Find `OpenShift Container Storage`
 - Install
-- Select `Installed namespace`, namespace `openshift-storage` will be created automatically
+- Select `A specific namespace on the cluster`, namespace `openshift-storage` will be created automatically
 - Update channel: stable-4.5
+- Click Install
 
 ### Wait until the pods are running
 ```
@@ -61,7 +62,7 @@ You can install the operator using the OpenShift console.
 - Install
 - Specify namespace `local-storage`
 - Update channel: 4.5
-
+- Click Install
 
 ### Wait until the operator is running
 ```
