@@ -47,4 +47,4 @@ You can finalize the OpenShift installation by executing the steps in the docume
 ## Step 6 - Install the Cloud Pak
 The below list links to the installation steps of various Cloud Paks, provided by IBM Cloud Pak technical specialists. It is by no means intended to replace the official documentation, but meant to accelerate the deployment of the Cloud Pak for POC and demo purposes.
 
-* [Cloud Pak for Data 3.0.1](/doc/install-cp4d-30.md)
+* [Cloud Pak for Data 3.5](/doc/install-cp4d-35.md)
