@@ -162,7 +162,7 @@ Once the installation of the *Lite* assembly has finished, you can access Cloud 
 assembly="wsl"
 cd /nfs/cpd
 ./cpd-cli adm -a $assembly --repo ./repo.yaml --namespace zen --apply --accept-all-licenses
-./cpd-cli -a $assembly -n zen -c nfs-client --transfer-image-to=$(oc registry info)/zen -r ./repo.yaml --target-registry-username=$(oc whoami) --target-registry-password=$(oc whoami -t) --insecure-skip-tls-verify --cluster-pull-prefix=image-registry.openshift-image-registry.svc:5000/zen --accept-all-licenses
+./cpd-cli install -a $assembly -n zen -c nfs-client --transfer-image-to=$(oc registry info)/zen -r ./repo.yaml --target-registry-username=$(oc whoami) --target-registry-password=$(oc whoami -t) --insecure-skip-tls-verify --cluster-pull-prefix=image-registry.openshift-image-registry.svc:5000/zen --accept-all-licenses
 ```
 
 ### List available patches
@@ -205,7 +205,7 @@ cd /nfs/cpd
 for assembly in $assemblies;do
   echo $assembly
   ./cpd-cli adm -a $assembly --repo ./repo.yaml --namespace zen --apply --accept-all-licenses
-  ./cpd-cli -a $assembly -n zen -c nfs-client --transfer-image-to=$(oc registry info)/zen -r ./repo.yaml --target-registry-username=$(oc whoami) --target-registry-password=$(oc whoami -t) --insecure-skip-tls-verify --cluster-pull-prefix=image-registry.openshift-image-registry.svc:5000/zen --cluster-pull-username=$(oc whoami) --cluster-pull-password=$(oc whoami -t) --accept-all-licenses
+  ./cpd-cli install -a $assembly -n zen -c nfs-client --transfer-image-to=$(oc registry info)/zen -r ./repo.yaml --target-registry-username=$(oc whoami) --target-registry-password=$(oc whoami -t) --insecure-skip-tls-verify --cluster-pull-prefix=image-registry.openshift-image-registry.svc:5000/zen --cluster-pull-username=$(oc whoami) --cluster-pull-password=$(oc whoami -t) --accept-all-licenses
 done
 ```
 
@@ -231,7 +231,7 @@ oc project zen # Ignore the warning message if you get one
 ```
 cd /cp4d_downloads/cpd
 ./cpd-cli adm --assembly lite --namespace zen --load-from ./cpd-linux-workspace --apply --accept-all-licenses
-./cpd-cli preloadImages --assembly lite --version 3.5.1 --load-from ./cpd-linux-workspace --action push --transfer-image-to=$(oc registry info)/zen --target-registry-username=$(oc whoami) --target-registry-password=$(oc whoami -t) --insecure-skip-tls-verify --accept-all-licenses
+./cpd-cli preload-images --assembly lite --version 3.5.1 --load-from ./cpd-linux-workspace --action push --transfer-image-to=$(oc registry info)/zen --target-registry-username=$(oc whoami) --target-registry-password=$(oc whoami -t) --insecure-skip-tls-verify --accept-all-licenses
 ./cpd-cli --assembly lite --version 3.5.1 --namespace zen --load-from ./cpd-linux-workspace --storageclass nfs-client --cluster-pull-prefix image-registry.openshift-image-registry.svc:5000/zen --accept-all-licenses
 ```
 

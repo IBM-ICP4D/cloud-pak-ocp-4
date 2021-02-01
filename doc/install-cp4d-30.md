@@ -193,7 +193,7 @@ Once the nip.io address is added, you can access Cloud Pak for Data using the fo
 assembly="wsl"
 cd /nfs/cpd/bin
 ./cpd-linux adm -a $assembly --repo /nfs/cpd/repo.yaml --namespace zen --apply --accept-all-licenses
-./cpd-linux -a $assembly -n zen -c nfs-client --transfer-image-to=$(oc registry info)/zen -r ../repo.yaml --target-registry-username=$(oc whoami) --target-registry-password=$(oc whoami -t) --insecure-skip-tls-verify --cluster-pull-prefix=image-registry.openshift-image-registry.svc:5000/zen --accept-all-licenses
+./cpd-linux install -a $assembly -n zen -c nfs-client --transfer-image-to=$(oc registry info)/zen -r ../repo.yaml --target-registry-username=$(oc whoami) --target-registry-password=$(oc whoami -t) --insecure-skip-tls-verify --cluster-pull-prefix=image-registry.openshift-image-registry.svc:5000/zen --accept-all-licenses
 ```
 
 ### List available patches
@@ -235,7 +235,7 @@ cd /nfs/cpd/bin
 for assembly in $assemblies;do
   echo $assembly
   ./cpd-linux adm -a $assembly --repo ../repo.yaml --namespace zen --apply --accept-all-licenses
-  ./cpd-linux -a $assembly -n zen -c nfs-client --transfer-image-to=$(oc registry info)/zen -r ../repo.yaml --target-registry-username=$(oc whoami) --target-registry-password=$(oc whoami -t) --insecure-skip-tls-verify --cluster-pull-prefix=image-registry.openshift-image-registry.svc:5000/zen --cluster-pull-username=$(oc whoami) --cluster-pull-password=$(oc whoami -t) --accept-all-licenses
+  ./cpd-linux install -a $assembly -n zen -c nfs-client --transfer-image-to=$(oc registry info)/zen -r ../repo.yaml --target-registry-username=$(oc whoami) --target-registry-password=$(oc whoami -t) --insecure-skip-tls-verify --cluster-pull-prefix=image-registry.openshift-image-registry.svc:5000/zen --cluster-pull-username=$(oc whoami) --cluster-pull-password=$(oc whoami -t) --accept-all-licenses
 done
 ```
 
