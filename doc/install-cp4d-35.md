@@ -110,10 +110,10 @@ These steps assume that the OpenShift cluster is connected to the internet. If n
 
 ## Download installer
 ```
-wget https://github.com/IBM/cpd-cli/releases/download/v3.5.0/cpd-cli-linux-EE-3.5.1.tgz -P /tmp/
+wget https://github.com/IBM/cpd-cli/releases/download/v3.5.0/cpd-cli-linux-EE-3.5.2.tgz -P /tmp/
 mkdir -p /nfs/cpd
-tar xvf /tmp/cpd-cli-linux-EE-3.5.1.tgz -C /nfs/cpd
-rm -f /tmp/cpd-cli-linux-EE-3.5.1.tgz
+tar xvf /tmp/cpd-cli-linux-EE-3.5.2.tgz -C /nfs/cpd
+rm -f /tmp/cpd-cli-linux-EE-3.5.2.tgz
 ```
 
 ## Obtain your entitlement key for the container registry
