@@ -126,12 +126,35 @@ watch -n 5 'oc get pod -n openshift-storage'
 
 Wait until the OCS operator pod `ocs-operator-xxxxxxxx-yyyyy` is running with READY=`1/1`. You will see more than 20 pods starting in the `openshift-storage` namespace.
 
-## Add universal toleration to CSI plug-ins
-If you install any components which require nodes to be tainted (such as Db2 Event Store), you need to add universal toleration to the OCS DaemonSets, as documented here: https://access.redhat.com/solutions/5061861.
+## Add toleration to CSI plug-ins
+If you install any components which require nodes to be tainted (such as Db2 Event Store), you need to add additional tolerations for the OCS DaemonSets, which can be done via the `rook-ceph-operator-config` ConfigMap.
+
+First, get the definition of the Configmap:
 ```
-oc patch ds csi-cephfsplugin -n openshift-storage  --type=merge -p '{"spec": {"template": { "spec": {"tolerations":[{"operator":"Exists"}]}}}}'
-oc patch ds csi-rbdplugin -n openshift-storage  --type=merge -p '{"spec": {"template": { "spec": {"tolerations":[{"operator":"Exists"}]}}}}'
+oc get cm -n openshift-storage rook-ceph-operator-config -o yaml > /tmp/rook-ceph-operator-config.yaml
 ```
+
+Edit, the file to have the following value for the CSI_PLUGIN_TOLERATIONS data element:
+```
+data:
+  CSI_PLUGIN_TOLERATIONS: |2-
+
+    - key: node.ocs.openshift.io/storage
+      operator: Equal
+      value: "true"
+      effect: NoSchedule
+    - key: icp4data
+      operator: Equal
+      value: "database-db2eventstore"
+      effect: NoSchedule
+```
+
+Apply the changes to the ConfigMap:
+```
+oc apply -f /tmp/rook-ceph-operator-config.yaml
+```
+
+You should notice that the CSI pods are now also scheduled on the Event Store nodes. This ConfigMap change will survive the restart of the rook operator.
 
 ## Record name of storage class(es)
 Now that the OCS operator has been created you should have a `ocs-storagecluster-cephfs` storage class which you can use for the internal image registry and other purposes.
