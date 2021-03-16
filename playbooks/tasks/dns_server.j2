@@ -8,18 +8,21 @@ address=/api-int.{{cluster_name}}.{{domain_name}}/{{groups['lb'][0]}}
 address=/api.{{cluster_name}}.{{domain_name}}/{{groups['lb'][0]}}
 address=/.apps.{{cluster_name}}.{{domain_name}}/{{groups['lb'][0]}}
 
+{% if ocp_installation_type=="UPI" %}
 address=/etcd-0.{{cluster_name}}.{{domain_name}}/{{groups['masters'][0]}}
 address=/etcd-1.{{cluster_name}}.{{domain_name}}/{{groups['masters'][1]}}
 address=/etcd-2.{{cluster_name}}.{{domain_name}}/{{groups['masters'][2]}}
 srv-host=_etcd-server-ssl._tcp.{{cluster_name}}.{{domain_name}},etcd-0.{{cluster_name}}.{{domain_name}},2380,0,10
 srv-host=_etcd-server-ssl._tcp.{{cluster_name}}.{{domain_name}},etcd-1.{{cluster_name}}.{{domain_name}},2380,0,10
 srv-host=_etcd-server-ssl._tcp.{{cluster_name}}.{{domain_name}},etcd-2.{{cluster_name}}.{{domain_name}},2380,0,10
+{% endif %}
 
 {% if dhcp_on_bastion %}
 domain={{cluster_name}}.{{domain_name}}
 dhcp-range={{dhcp_range[0]}},{{dhcp_range[1]}},infinite
 dhcp-option=3,{{default_gateway}}
 
+{% if ocp_installation_type=="UPI" %}
 {% for host in groups['masters'] | sort %}
 dhcp-host={{hostvars[host]['mac']}},{{hostvars[host]['host']}},{{host}}
 {% endfor %}
@@ -31,8 +34,9 @@ dhcp-host={{hostvars[host]['mac']}},{{hostvars[host]['host']}},{{host}}
 {% for host in groups['bootstrap'] | sort %}
 dhcp-host={{hostvars[host]['mac']}},{{hostvars[host]['host']}},{{host}}
 {% endfor %}
+{% endif %}
 
-{% if rhcos_installation_method=="pxe" %}
+{% if rhcos_installation_method=="pxe" and ocp_installation_type=="UPI" %}
 enable-tftp
 tftp-root=/tftpboot
 dhcp-boot=pxelinux.0

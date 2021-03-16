@@ -64,7 +64,7 @@
       - include: tasks/tftpboot.yaml
         tags: tftp
       - include: tasks/pxe_links.yaml
-      when: rhcos_installation_method=="pxe"
+      when: rhcos_installation_method=="pxe" and ocp_installation_type=="UPI"
 
     - include: tasks/dns_server.yaml
       tags: dns
