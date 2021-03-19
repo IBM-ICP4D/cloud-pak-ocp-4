@@ -168,7 +168,7 @@ vc_datacenter="Datacenter1"
 vc_datastore="Datastore1"
 vc_cluster="Cluster1"
 vc_res_pool="resourcepool"
-vc_folder="/fkocp46"
+vc_folder="fkocp46"
 vc_network="VM Network"
 
 # Master VM properties
@@ -191,3 +191,7 @@ vm_worker_disk=200
 
 [bastion]
 10.99.92.50 host="bastion"
+
+[masters]
+
+[workers]

@@ -44,19 +44,6 @@
   gather_facts: yes
   become: yes
   tasks:
-    - name: 
-      block: 
-      - include: tasks/ocp_install_config.yaml
-        tags: ocp_install_config
-      - include: tasks/ocp_ignition.yaml
-        tags: ignition
-      - include: tasks/create_oauth.yaml
-      when: install_script_already_run==False
-
-    - include: tasks/registry_storage.yaml
-    - include: tasks/ocp_install_scripts.yaml
-      tags: scripts
-
     - include: tasks/dnsmasq_libvirt_remove.yaml
 
     - name:
@@ -70,6 +57,21 @@
       tags: dns
     - include: tasks/dns_interface.yaml
       tags: dns
+
+    - name: 
+      block: 
+      - include: tasks/ocp_install_config.yaml
+        tags: ocp_install_config
+      - include: tasks/ocp_ignition.yaml
+        tags: ignition
+      - include: tasks/create_oauth.yaml
+      when: install_script_already_run==False
+
+    - include: tasks/registry_storage.yaml
+    - include: tasks/ocp_install_scripts.yaml
+      tags: scripts
+
+
 
 - hosts: lb
   remote_user: root
