@@ -1,10 +1,10 @@
 ---
 # Generate install-config.yaml
 
-- name: Generate OCP admin password
+- name: Generate OCP administrator ocadmin password
   htpasswd:
     path: "{{ocp_install_dir}}/htpasswd"
-    name: admin
+    name: ocadmin
     password: "{{ocp_admin_password}}"
     owner: root
     mode: 0640

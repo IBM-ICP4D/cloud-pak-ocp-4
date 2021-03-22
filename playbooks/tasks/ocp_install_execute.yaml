@@ -16,7 +16,7 @@
   shell: |
     {{ocp_install_dir}}/scripts/wait_nodes_ready.sh
 
-- name: Create admin user
+- name: Create ocadmin user
   shell: |
     {{ocp_install_dir}}/scripts/create_admin_user.sh
 

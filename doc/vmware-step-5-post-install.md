@@ -2,7 +2,7 @@
 The steps below guide you through the post-installation steps of OpenShift. It assumes that the OpenShift masters and workers are in **Ready** state.
 
 ## Post-install steps
-The following script will delete the `kubeadmin` user, clean up the PXE links and rebuild the known_hosts file.
+The following script will clean up the PXE links and rebuild the known_hosts file.
 ```
 /ocp_install/scripts/post_install.sh
 ```

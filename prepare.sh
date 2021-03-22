@@ -42,7 +42,7 @@ if [ ! -e $pull_secret_file ];then
 fi
 
 if [ -z $ocp_admin_password ];then
-  echo 'OpenShift administrator password (ocp_admin_password):'
+  echo 'OpenShift ocadmin administrator password (ocp_admin_password):'
   read -s ocp_admin_password
   if [ -z $ocp_admin_password ];then
     echo "Error: OpenShift administrator password. OpenShift administrator password environment variable ocp_admin_password or entered at prompt"

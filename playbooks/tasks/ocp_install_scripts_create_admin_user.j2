@@ -3,4 +3,4 @@
 export KUBECONFIG={{ocp_install_dir}}/auth/kubeconfig
 oc create secret generic htpass-secret --from-file={{ocp_install_dir}}/htpasswd -n openshift-config
 oc apply -f {{ocp_install_dir}}/ocp_oauth.yaml
-oc adm policy add-cluster-role-to-user cluster-admin admin
+oc adm policy add-cluster-role-to-user cluster-admin ocadmin

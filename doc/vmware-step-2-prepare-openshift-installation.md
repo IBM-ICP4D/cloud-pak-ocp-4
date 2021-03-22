@@ -26,7 +26,7 @@ wget http://registry.uk.ibm.com:8080/ocp4_downloads/registry/certs/registry.crt 
 > If your registry server is not registered in the DNS, you can add an entry to the `/etc/hosts` file on the bastion node. This file is used for input by the DNS server spun up on the bastion node so the registry server IP address can be resolved from all the cluster node.
 
 ## Prepare the nodes for the OpenShift installation
-If you can set the credentials in environment variables, the prepare script will not prompt. If the environment variables are empty, you will prompted to specify the credentials for the `root` user (to enable passwordless SSH) and the OpenShift admin user (to log on to the OpenShift Console later).
+If you can set the credentials in environment variables, the prepare script will not prompt. If the environment variables are empty, you will prompted to specify the credentials for the `root` user (to enable passwordless SSH) and the OpenShift ocadmin user (to log on to the OpenShift Console later).
 ```
 export root_password=<the root password of the servers>
 export ocp_admin_password=<The OCP password you want to set for the admin console>

@@ -18,4 +18,4 @@ If you install OpenShift 4.3 or used a different value for the domain or cluster
 Once you have added this entry, navigate to the following address:
 https://console-openshift-console.apps.ocp43.uk.ibm.com 
 
-Log on using user `admin` and password `passw0rd`.
+Log on using user `ocadmin` and password `passw0rd`.

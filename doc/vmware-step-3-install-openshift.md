@@ -55,8 +55,8 @@ oc get no
 
 Repeat the `oc get csr` and `oc get no` commands until you see all workers added to your cluster.
 
-## Create OpenShift admin user
-Rather than using `kubeadmin` to operate OpenShift, we're creating an OpenShift `admin` user. The script below will create the `admin` user with the password that was set in the environment variable `ocp_admin_password`.
+## Create OpenShift administrator user
+Rather than using `kubeadmin` to operate OpenShift, we're creating an OpenShift administrator` user. The script below will create the `ocadmin` user with the password that was set in the environment variable `ocp_admin_password`.
 ```
 /ocp_install/scripts/create_admin_user.sh
 ```

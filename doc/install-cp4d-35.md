@@ -16,7 +16,7 @@ screen
 ## Log on to OpenShift
 If not already logged on, log on to the bastion node as `root`; this is the 2nd IP address in the Asset Access Instructions document.
 ```
-oc login -s https://api.apps.ocp45.uk.ibm.com:6443 -u admin -p passw0rd --insecure-skip-tls-verify=true
+oc login -s https://api.apps.ocp45.uk.ibm.com:6443 -u ocadmin -p passw0rd --insecure-skip-tls-verify=true
 ```
 
 ## Override CRI-O settings

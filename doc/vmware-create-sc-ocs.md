@@ -7,7 +7,7 @@ The steps in this document assume you have 3 (dedicated) worker nodes in the clu
 
 ## Log in to OpenShift
 ```
-oc login -u admin -p passw0rd
+oc login -u ocadmin -p passw0rd
 ```
 
 ## Add labels to the workers
