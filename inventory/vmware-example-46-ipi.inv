@@ -9,16 +9,6 @@ cluster_name="ocp46"
 default_gateway="10.99.92.1"
 
 #
-# Installation type, this can be either UPI (User-provisioned infrastructure) or IPI (Installer-provisioned infrastructure).
-# The default installation type is UPI. If IPI is specified, OpenShift will automatically create the VMs according to the 
-# specifications below. You do not need to excplicitly specify node names or MAC addresses as the are automatically assigned
-# as part of the installation process.
-#
-ocp_installation_type="IPI"
-apiVIP="10.99.92.51"
-ingressVIP="10.99.92.52"
-
-#
 # OCP Installation directory
 # Depicts the directory on the bastion (current) node in which the OpenShift installation
 # artifacts will be stored.
@@ -58,8 +48,11 @@ rhcos_ova_package_pattern=".*(rhcos.*.ova).*"
 # Indicate the method by which Red Hat CoreOS will be installed. This can be one of the following values:
 # - pxe: CoreOS will be loaded on the bootstrap, masters and workers using PXE-boot. This is the default.
 # - ova: Only for VMWare. CoreOS will be loaded using a VMWare template (imported OVA file).
+# - ipi: Only for VMWare. CoreOS and OpenShift will be installed via Installer-provisioned infrastructure. OpenShift
+#        will take care of creating the required VMs and automatically assigns hostnames. If you choose this installation
+#        method, please also complete the IPI section in the inventory file.
 #
-rhcos_installation_method=pxe
+rhcos_installation_method=ipi
 
 #
 # Indicate whether to opt out of remote health checking of the OpenShift cluster
@@ -160,8 +153,14 @@ image_registry_size=200Gi
 service_network="172.30.0.0/16"
 
 #
+# Additional variables for IPI (Installer-provisioned Infrastructure) installations. 
+#
+apiVIP="10.99.92.51"
+ingressVIP="10.99.92.52"
+
+#
 # VMware envrionment specific variables. These are only used if you intend to create the VMs using the
-# vm_create.sh script. You can ignore these if you manually create the VMs.
+# vm_create.sh script or with IPI intallations. You can ignore these if you manually create the VMs.
 #
 vc_vcenter="10.99.92.13"
 vc_datacenter="Datacenter1"
@@ -193,5 +192,7 @@ vm_worker_disk=200
 10.99.92.50 host="bastion"
 
 [masters]
+# Ignored for IPI installations
 
 [workers]
+# Ignored for IPI installations

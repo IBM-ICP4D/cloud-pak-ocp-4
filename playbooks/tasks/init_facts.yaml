@@ -4,4 +4,4 @@
   set_fact:
     reboot_server: False
     install_script_already_run: False
-    ocp_installation_type: "{{ ocp_installation_type | default('UPI') }}"
+    rhcos_installation_method: "{{ rhcos_installation_method | default('PXE') }}"

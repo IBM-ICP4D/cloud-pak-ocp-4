@@ -48,6 +48,9 @@ rhcos_ova_package_pattern=".*(rhcos.*.ova).*"
 # Indicate the method by which Red Hat CoreOS will be installed. This can be one of the following values:
 # - pxe: CoreOS will be loaded on the bootstrap, masters and workers using PXE-boot. This is the default.
 # - ova: Only for VMWare. CoreOS will be loaded using a VMWare template (imported OVA file).
+# - ipi: Only for VMWare. CoreOS and OpenShift will be installed via Installer-provisioned infrastructure. OpenShift
+#        will take care of creating the required VMs and automatically assigns hostnames. If you choose this installation
+#        method, please also complete the IPI section in the inventory file.
 #
 rhcos_installation_method=pxe
 

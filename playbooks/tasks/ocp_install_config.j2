@@ -11,7 +11,7 @@ proxy:
 compute:
 - hyperthreading: Enabled
   name: worker
-{% if ocp_installation_type == "UPI" %}
+{% if rhcos_installation_method|upper!="IPI" %}
   replicas: 0
 {% else %}
   replicas: {{vm_number_of_workers}}
@@ -26,7 +26,7 @@ compute:
 controlPlane:
   hyperthreading: Enabled
   name: master
-{% if ocp_installation_type == "UPI" %}
+{% if rhcos_installation_method|upper!="IPI" %}
   replicas: 3
 {% else %}
   replicas: {{vm_number_of_masters}}
@@ -41,7 +41,7 @@ controlPlane:
 metadata:
   name: {{ cluster_name }}
 platform:
-{% if ocp_installation_type == "UPI" %}
+{% if rhcos_installation_method|upper!="IPI" %}
   none: {}
 {% else %}
   vsphere:

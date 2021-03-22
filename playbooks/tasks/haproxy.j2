@@ -10,7 +10,7 @@ frontend api
     bind *:6443
     mode tcp
     default_backend cpapi
-{% if ocp_installation_type=="UPI" %}
+{% if rhcos_installation_method|upper!="IPI" %}
 frontend cfg
     bind *:22623
     mode tcp
@@ -28,7 +28,7 @@ frontend https
 
 backend cpapi
     balance roundrobin
-{% if ocp_installation_type=="UPI" %}
+{% if rhcos_installation_method|upper!="IPI" %}
     server bootstrap {{groups['bootstrap'][0]}}:6443 check
 {% for host in groups['masters'] | sort %}
     server {{hostvars[host]['host']}} {{host}}:6443 check
@@ -37,7 +37,7 @@ backend cpapi
     server masters {{apiVIP}}:6443 check
 {% endif %}
 
-{% if ocp_installation_type=="UPI" %}
+{% if rhcos_installation_method|upper!="IPI" %}
 backend cpcfg
     balance roundrobin
     server bootstrap {{groups['bootstrap'][0]}}:22623 check
@@ -50,7 +50,7 @@ backend wrkhttp
     mode http
     balance roundrobin
     option forwardfor
-{% if ocp_installation_type=="UPI" %}
+{% if rhcos_installation_method|upper!="IPI" %}
 {% for host in groups['workers'] | sort %}
     server {{hostvars[host]['host']}} {{host}}:80 check
 {% endfor %}
@@ -61,7 +61,7 @@ backend wrkhttp
 backend wrkhttps
     mode tcp
     balance roundrobin
-{% if ocp_installation_type=="UPI" %}
+{% if rhcos_installation_method|upper!="IPI" %}
 {% for host in groups['workers'] | sort %}
     server {{hostvars[host]['host']}} {{host}}:443 check
 {% endfor %}

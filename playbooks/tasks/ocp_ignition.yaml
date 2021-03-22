@@ -3,31 +3,31 @@
 - name: Create OpenShift ignition manifests
   shell: |
     {{ocp_install_dir}}/openshift-install create manifests --dir={{ocp_install_dir}}
-  when: ocp_installation_type=="UPI"
+  when: rhcos_installation_method|upper!="IPI"
 
 - name: Create OpenShift cluster
   shell: |
     {{ocp_install_dir}}/openshift-install create cluster --dir={{ocp_install_dir}}
-  when: ocp_installation_type=="IPI"
+  when: rhcos_installation_method|upper=="IPI"
 
 - name: Make masters unschedulable
   lineinfile:
     path: "{{ocp_install_dir}}/manifests/cluster-scheduler-02-config.yml"
     regex: "  mastersSchedulable: true"
     line: "  mastersSchedulable: false"
-  when: ocp_installation_type=="UPI"
+  when: rhcos_installation_method|upper!="IPI"
 
 - name: To check, keep copy of cluster-scheduler-02-config.yml in /tmp
   copy:
     src: "{{ocp_install_dir}}/manifests/cluster-scheduler-02-config.yml"
     dest: /tmp/cluster-scheduler-02-config.yml
-  when: ocp_installation_type=="UPI"
+  when: rhcos_installation_method|upper!="IPI"
 
 - name: Get the chrony client configuration
   slurp:
     src: "{{ocp_install_dir}}/chrony_client.conf"
   register: chrony_client_conf
-  when: ocp_installation_type=="UPI"
+  when: rhcos_installation_method|upper!="IPI"
 
 - name: Create Machine Config for chrony
   template:
@@ -41,13 +41,13 @@
     - "worker"
   vars:
     node_type: "{{item}}"
-  when: override_chrony_settings_on_cluster_nodes|bool and ocp_installation_type=="UPI"
+  when: override_chrony_settings_on_cluster_nodes|bool and rhcos_installation_method|upper!="IPI"
 
 - name: Get the global proxy configuration (if defined)
   slurp:
     src: "/etc/profile.d/global_proxy.sh"
   register: global_proxy_conf
-  when: configure_global_proxy is defined and configure_global_proxy==True and ocp_installation_type=="UPI"
+  when: configure_global_proxy is defined and configure_global_proxy==True and rhcos_installation_method|upper!="IPI"
 
 - name: Create Machine Config for global proxy
   template:
@@ -61,12 +61,12 @@
     - "worker"
   vars:
     node_type: "{{item}}"
-  when: configure_global_proxy is defined and configure_global_proxy==True and ocp_installation_type=="UPI"
+  when: configure_global_proxy is defined and configure_global_proxy==True and rhcos_installation_method|upper!="IPI"
 
 - name: Create OpenShift ignition configurations
   shell: |
     {{ocp_install_dir}}/openshift-install create ignition-configs --dir={{ocp_install_dir}}
-  when: ocp_installation_type=="UPI"
+  when: rhcos_installation_method|upper!="IPI"
 
 - name: Change ignition files permissions
   file:
@@ -78,7 +78,7 @@
     - "{{ocp_install_dir}}/bootstrap.ign"
     - "{{ocp_install_dir}}/master.ign"
     - "{{ocp_install_dir}}/worker.ign"
-  when: ocp_installation_type=="UPI"
+  when: rhcos_installation_method|upper!="IPI"
 
 - name: Allow nginx to read ignition files (SELinux)
   sefcontext:
@@ -87,11 +87,11 @@
     seuser: system_u
     ftype: a
     state: present
-  when: ansible_selinux.status=='enabled' and ocp_installation_type=="UPI"
+  when: ansible_selinux.status=='enabled' and rhcos_installation_method|upper!="IPI"
 
 - name: Restore SELinux context for ignition files
   shell: restorecon -Rv "{{ocp_install_dir}}/*.ign"
-  when: ocp_installation_type=="UPI"
+  when: rhcos_installation_method|upper!="IPI"
 
 - name: Generate base64 ignition files
   copy:
@@ -101,4 +101,4 @@
     - "{{ocp_install_dir}}/bootstrap.ign"
     - "{{ocp_install_dir}}/master.ign"
     - "{{ocp_install_dir}}/worker.ign"
-  when: ocp_installation_type=="UPI"
+  when: rhcos_installation_method|upper!="IPI"

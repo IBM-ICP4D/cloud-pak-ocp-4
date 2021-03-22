@@ -8,7 +8,7 @@ address=/api-int.{{cluster_name}}.{{domain_name}}/{{groups['lb'][0]}}
 address=/api.{{cluster_name}}.{{domain_name}}/{{groups['lb'][0]}}
 address=/.apps.{{cluster_name}}.{{domain_name}}/{{groups['lb'][0]}}
 
-{% if ocp_installation_type=="UPI" %}
+{% if rhcos_installation_method|upper != "IPI" %}
 address=/etcd-0.{{cluster_name}}.{{domain_name}}/{{groups['masters'][0]}}
 address=/etcd-1.{{cluster_name}}.{{domain_name}}/{{groups['masters'][1]}}
 address=/etcd-2.{{cluster_name}}.{{domain_name}}/{{groups['masters'][2]}}
@@ -22,7 +22,7 @@ domain={{cluster_name}}.{{domain_name}}
 dhcp-range={{dhcp_range[0]}},{{dhcp_range[1]}},infinite
 dhcp-option=3,{{default_gateway}}
 
-{% if ocp_installation_type=="UPI" %}
+{% if rhcos_installation_method|upper!="IPI" %}
 {% for host in groups['masters'] | sort %}
 dhcp-host={{hostvars[host]['mac']}},{{hostvars[host]['host']}},{{host}}
 {% endfor %}
@@ -36,7 +36,7 @@ dhcp-host={{hostvars[host]['mac']}},{{hostvars[host]['host']}},{{host}}
 {% endfor %}
 {% endif %}
 
-{% if rhcos_installation_method=="pxe" and ocp_installation_type=="UPI" %}
+{% if rhcos_installation_method|upper=="PXE" %}
 enable-tftp
 tftp-root=/tftpboot
 dhcp-boot=pxelinux.0
