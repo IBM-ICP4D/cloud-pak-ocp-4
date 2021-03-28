@@ -55,7 +55,7 @@ backend wrkhttp
     server {{hostvars[host]['host']}} {{host}}:80 check
 {% endfor %}
 {% else %}
-    server workers {{ingressVIP}}:6443 check
+    server workers {{ingressVIP}}:80 check
 {% endif %}
 
 backend wrkhttps
@@ -66,5 +66,5 @@ backend wrkhttps
     server {{hostvars[host]['host']}} {{host}}:443 check
 {% endfor %}
 {% else %}
-    server workers {{ingressVIP}}:6443 check
+    server workers {{ingressVIP}}:443 check
 {% endif %}
