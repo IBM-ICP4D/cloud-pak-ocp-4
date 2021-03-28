@@ -6,6 +6,9 @@
   gather_facts: no
   become: no
   tasks:
+    - name: Import vSphere certificates
+      include: tasks/vm_import_certificates.yaml
+
     - name: Create bootstrap vm
       include: tasks/vm_create.yaml
       vars:
