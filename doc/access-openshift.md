@@ -7,15 +7,10 @@ If you want to access OpenShift from your local browser, change the `/etc/hosts`
 
 Example `/etc/hosts` entry:
 ```
-<Load_Balancer_IP> console-openshift-console.apps.ocp43.uk.ibm.com oauth-openshift.apps.ocp43.uk.ibm.com
-```
-
-If you install OpenShift 4.3 or used a different value for the domain or cluster name, you need to change the values accordingly, for example:
-```
-<Load_Balancer_IP> console-openshift-console.apps.ocp43.uk.ibm.com oauth-openshift.apps.ocp43.uk.ibm.com
+<Load_Balancer_IP> console-openshift-console.apps.ocp45.coc.ibm.com oauth-openshift.apps.ocp45.coc.ibm.com
 ```
 
 Once you have added this entry, navigate to the following address:
-https://console-openshift-console.apps.ocp43.uk.ibm.com 
+https://console-openshift-console.apps.ocp45.coc.ibm.com 
 
 Log on using user `ocadmin` and password `passw0rd`.

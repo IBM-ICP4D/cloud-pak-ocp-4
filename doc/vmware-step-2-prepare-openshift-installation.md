@@ -25,25 +25,27 @@ wget http://registry.uk.ibm.com:8080/ocp4_downloads/registry/certs/registry.crt 
 
 > If your registry server is not registered in the DNS, you can add an entry to the `/etc/hosts` file on the bastion node. This file is used for input by the DNS server spun up on the bastion node so the registry server IP address can be resolved from all the cluster node.
 
-## Prepare the nodes for the OpenShift installation
-If you can set the credentials in environment variables, the prepare script will not prompt. If the environment variables are empty, you will prompted to specify the credentials for the `root` user (to enable passwordless SSH) and the OpenShift ocadmin user (to log on to the OpenShift Console later).
+## Prepare the nodes for the OpenShift installation or run the installation
+Set environment variables for the root password of the bastion, NFS and load balancer nodes (must be the same) and set the OpenShift administrator (ocadmin) password. If you do not set the environment variables, the script will prompt to specify them.
 ```
 export root_password=<the root password of the servers>
 export ocp_admin_password=<The OCP password you want to set for the admin console>
 ```
 
+### Install if your vSphere user can create VMs
+If your vSphere user can create VMs and you are performing and IPI installation or can have the preparation script create the virtual machines, run the script as follows:
+
+```
+cd ~/cloud-pak-ocp-4
+./prepare.sh -i inventory/<inventory-file> -e vc_user=<vsphere-user> -e vc_password=<vsphere-password> [other parameters...]
+```
+
+### Install if the VMs have been pre-created
 On the bastion node, you must run the script that will prepare the installation of OpenShift 4.x.
 ```
 cd ~/cloud-pak-ocp-4
 ./prepare.sh -i inventory/<inventory-file> [other parameters...]
 ```
-
-If you want to continue with the installation after preparing the bastion node, you can run the prepare script like this:
-```
-cd ~/cloud-pak-ocp-4
-./prepare.sh -i inventory/<inventory-file> -e run_install=true [other parameters...]
-```
-You will then be prompted when you need to start the bootstrap, master and worker nodes.
 
 ### Prepare script failing
 If the prepare script fails at some point, you can fix the issue and run the script again. Don't continue to the next step until the Ansible playbook has run successfully.
@@ -63,8 +65,8 @@ Install common packages --------------------------------------------------------
 Generate ignition files for the workers -------------------------------------------------------------------------------------------------------------------------------------- 1.47s
 ```
 
-## Continue with next step
-Once the bastion node has been prepared and all required services are running, you can continue with the next step - installation of OpenShift:
+## Continue with next step if you chose manual installation
+If you specified `run_install=True` in the inventory file, the preparation script will attempt to run the installation to the end, including creation of storage classes and configuring the registry. Should you want to run the installation manually, you can proceed with the next step: installation of OpenShift.
 
 [VMWare - Step 3 - Install OpenShift](/doc/vmware-step-3-install-openshift.md)
 
