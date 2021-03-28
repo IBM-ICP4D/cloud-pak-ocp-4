@@ -150,6 +150,9 @@
       - name: Remove bootstrap
         shell: |
           {{ocp_install_dir}}/scripts/remove_bootstrap.sh
+      when: run_install|bool and rhcos_installation_method|upper!="IPI"
+
+    - block:
       - name: Wait for all nodes to become ready
         shell: |
           {{ocp_install_dir}}/scripts/wait_nodes_ready.sh
