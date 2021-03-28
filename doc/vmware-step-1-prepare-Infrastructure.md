@@ -76,31 +76,19 @@ Go to the `inventory` directory and copy one of the exiting `.inv` files. Make s
 * Domain name and cluster name, these will be used to define the node names of the cluster
 * Proxy configuration (if applicable)
 * OpenShift version
-* Installation type (PXE Boot or using a VMWare template), see next section
+* Installation type (IPI, PXE Boot or using a VMWare template), see next section
 * All IP addresses should match your cluster configuration, including DHCP range
 
-## Create VMWare template
-To install the required Red Hat CoreOS (RHCOS) on the cluster nodes, you have two choices:
+## Choose installation type
+To install the required Red Hat CoreOS (RHCOS) on the cluster nodes, you have two main choices: you can let OpenShift provision the infrastructure (installer-provisioned infrastructure) or provision the infrastructure yourself (user-provisoned infrastructure). With UPI you can then choose between PXE boot or VMWare template installation.
+* IPI: OpenShift will create the VMs as part of the installation.
 * PXE Boot (pxe): Create empty nodes. When booted, the operating system will be loaded from the bastion node using TFTP.
-* VMWare template (ova): Import the RHCOS file into vSphere and convert to a template; this template will then be used to create the cluster VMs.
+* VMWare template (ova): Create nodes based on an OVA template that was uploaded to vSphere.
 
-## Create the cluster VMs
-If you have administrator access to the ESX infrastructure, you can use scripts to automatically create the empty VMs required to stand up an OpenShift cluster. Alternatively, for example if you do not have the required permissions, you can create VMs manually, either empty if you're using PXE boot installation or using a VMWare template.
+For the VMWare template-based installation (ova), you must first upload the OVA template to vSphere.
 
-### Automatic provisioning of the cluster VMs
-In the previous step you have customized the inventory file to match your cluster layout and VM properties. You can run the `vm_create.sh` script to create the VMs for the bootstrap, masters and workers. In case you did not set the `vc_user` and `vc_password` environment variables, you will be prompted for the user and password. If the installation type in the inventory file is **pxe**, empty VMs are created; if the installation type is **ova**, VMs will be created based on the specified template.
-```
-cd ~/cloud-pak-ocp-4
-./vm_create.sh -i inventory/<inventory-file> [other parameters...]
-```
-
-After creation, the VM folder should look something like this:
-![vSphere VMs](/images/vsphere-vm-folder.png)
-
-The MAC-adresses of the newly created VMs are added/updated in the hosts section of the inventory file.
-
-### Manual provisioning of the VMs
-If you have NOT created the VMs using the provided script, you will have to manually create VMs on your ESX infrastructure. Either create empty VMs in case of **pxe** installation type, otherwise clone the Red Hat CoreOS template that was imported into vSphere.
+## Create the cluster VMs (if you don't have the vSphere credentials)
+If you have administrator access to the ESX infrastructure, you can use scripts to automatically create the empty VMs required to stand up an OpenShift cluster. Alternatively, for example if you do not have the required permissions, you can have the vSphere administrator create VMs manually, either empty if you're using PXE boot installation or using a VMWare template.
 
 Provision the following VMs:
 * 1 bootstrap node with 100 GB assigned to the first volume, 4 processing cores and 8 GB of memory
