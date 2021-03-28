@@ -1,0 +1,9 @@
+---
+
+- name: Import vSphere certificates
+  include: vm_import_certificates.yaml
+
+- name: Create OpenShift cluster using IPI installer
+  shell: |
+    {{ocp_install_dir}}/openshift-install create cluster --dir={{ocp_install_dir}}
+
