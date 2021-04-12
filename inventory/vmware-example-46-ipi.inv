@@ -199,6 +199,9 @@ vm_worker_disk=200
 [bastion]
 10.99.92.50 host="bastion"
 
+[bootstrap]
+# Ignored for IPI installations
+
 [masters]
 # Ignored for IPI installations
 
