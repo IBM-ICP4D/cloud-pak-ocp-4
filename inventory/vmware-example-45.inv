@@ -105,6 +105,10 @@ http_server_port=8090
 # Set up desktop on the bastion node
 setup_desktop=False
 
+# Set the bastion hostname as part of the preparation. If set to True, the bastion hostname will be set to
+# <bastion_host>.<cluster_name>.<domain_name>
+set_bastion_hostname=False
+
 #
 # If manage_nfs is True, the Ansible script will try to format and mount the NFS volume configured in the nfs_volume*
 # properties on the server indicated in the [nfs] section. If the value is False, the nfs server referred to in the [nfs]
