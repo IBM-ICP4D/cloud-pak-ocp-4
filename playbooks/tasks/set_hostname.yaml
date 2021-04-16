@@ -4,3 +4,4 @@
 - name: Set host name for bastion server to "{{hostvars[groups['bastion'][0]].host}}.{{cluster_name}}.{{domain_name}}"
   hostname:
     name: "{{hostvars[groups['bastion'][0]].host}}.{{cluster_name}}.{{domain_name}}"
+  when: set_bastion_hostname|bool

@@ -4,5 +4,6 @@
   set_fact:
     reboot_server: False
     install_script_already_run: False
+    set_bastion_hostname: {{ set_bastion_hostname | default(False) }}
     rhcos_installation_method: "{{ rhcos_installation_method | default('PXE') }}"
     vm_create_vms: "{{ vm_create_vms | default(False) }}"
