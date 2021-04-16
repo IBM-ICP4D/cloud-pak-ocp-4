@@ -7,6 +7,7 @@
     owner: root
     group: root
     mode: 0755
+  when: rhcos_installation_method|upper!="IPI"
 
 - name: Generate {{ocp_install_dir}}/scripts/remove_bootstrap.sh
   template:
@@ -15,6 +16,7 @@
     owner: root
     group: root
     mode: 0755
+  when: rhcos_installation_method|upper!="IPI"
 
 - name: Generate {{ocp_install_dir}}/scripts/wait_nodes_ready.sh
   template:

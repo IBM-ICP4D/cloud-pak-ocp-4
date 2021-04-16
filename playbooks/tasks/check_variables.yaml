@@ -1,0 +1,9 @@
+---
+- name: Check variables
+  fail:
+    msg: "vSphere user (vc_user) and password (vc_password) must be defined when doing IPI installation."
+  when: rhcos_installation_method|upper=="IPI" and (vc_user is not defined or vc_password is not defined)
+
+- fail:
+    msg: "vSphere user (vc_user) and password (vc_password) must be defined when creating VMs (vm_create_vms property in inventory)."
+  when: vm_create_vms==True and (vc_user is not defined or vc_password is not defined)

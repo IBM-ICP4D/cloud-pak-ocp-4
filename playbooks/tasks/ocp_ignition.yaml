@@ -38,7 +38,7 @@
   slurp:
     src: "/etc/profile.d/global_proxy.sh"
   register: global_proxy_conf
-  when: configure_global_proxy is defined and configure_global_proxy==True
+  when: configure_global_proxy is defined and configure_global_proxy==True 
 
 - name: Create Machine Config for global proxy
   template:
@@ -76,12 +76,12 @@
     seuser: system_u
     ftype: a
     state: present
-  when: ansible_selinux.status=='enabled'
+  when: ansible_selinux.status=='enabled' 
 
 - name: Restore SELinux context for ignition files
   shell: restorecon -Rv "{{ocp_install_dir}}/*.ign"
 
-- name: Generate base64 ignition files
+- name: Generate base64 ignition files for OVA installation
   copy:
     content: "{{ lookup('file',item) | b64encode }}"
     dest: "{{item}}.64"
@@ -89,3 +89,4 @@
     - "{{ocp_install_dir}}/bootstrap.ign"
     - "{{ocp_install_dir}}/master.ign"
     - "{{ocp_install_dir}}/worker.ign"
+  when: rhcos_installation_method|upper=="OVA"

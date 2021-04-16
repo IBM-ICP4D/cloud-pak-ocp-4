@@ -1,78 +1,89 @@
 ---
 # This playbook prepares the environment to install OpenShift 4.x
 
-- hosts: localhost
+#
+# The playbook consists of the following sections:
+# 1. Initialize bastion
+# 2. Provision infrastructure for UPI install
+# 3. Download OpenShift installer and client
+# 4. Configure instrastructure services (DNS, DHCP, Chrony, HAProxy, HTTP Server, NFS)
+# 5. Install OpenShift
+# 6. Wait for installation to complete
+# 7. Create storage class(es) anc configure internal registry
+# 8. Post-installation tasks
+
+#
+# 1. Initialize bastion node
+#
+- name: Initialize bastion
+  hosts: localhost
   connection: local
   gather_facts: no
   become: no
   tasks:
     - include: tasks/init_facts.yaml
+    - include: tasks/check_variables.yaml
     - include: tasks/dns_reset.yaml
     - include: tasks/firewall_iptables_remove.yaml
     - include: tasks/set_hostname.yaml
     - include: tasks/hosts.yaml
       tags: hosts
+- name: Configure SSH
+  import_playbook: tasks/ssh_playbook.yaml
+  tags: ssh
 
-- hosts: localhost
+#
+# 2. Provision infrastructure for UPI install
+#
+- name: Provision infrastructure for UPI install
+  import_playbook: ocp4_vm_create.yaml
+  when: vm_create_vms|bool and rhcos_installation_method|upper!="IPI"
+  tags: vm_create
+
+#
+# 3. Download OpenShift installer and client
+#
+- name: Download OpenShift installer and client
+  hosts: localhost
   connection: local
   gather_facts: yes
   become: no
   tasks:
     - include: tasks/ocp_install_dir.yaml
-
-    - include: tasks/global_proxy.yaml
-      tags: proxy
-
-    - include: tasks/chrony_server.yaml
-      tags: chrony
-    - include: tasks/chrony_client.yaml
-      tags: chrony
-
-    - include: tasks/http_server.yaml
-      tags: http
-    - include: tasks/etc_ansible_hosts.yaml
     - include: tasks/ocp_download.yaml
       tags: download
       when: install_script_already_run==False
 
-- name: Configure SSH
-  import_playbook: tasks/ssh_playbook.yaml
-  tags: ssh
- 
-- hosts: localhost
+#
+# 4. Configure instrastructure services (DNS, DHCP, Chrony, HAProxy, HTTP Server, NFS)
+#
+- name: Configure infrastructure services
+  hosts: localhost
   connection: local
   gather_facts: yes
-  become: yes
+  become: no
   tasks:
-    - name: 
-      block: 
-      - include: tasks/ocp_install_config.yaml
-        tags: ocp_install_config
-      - include: tasks/ocp_ignition.yaml
-        tags: ignition
-      - include: tasks/create_oauth.yaml
-      when: install_script_already_run==False
-
-    - include: tasks/registry_storage.yaml
-    - include: tasks/ocp_install_scripts.yaml
-      tags: scripts
-
+    - include: tasks/global_proxy.yaml
+      tags: proxy
+    - include: tasks/chrony_server.yaml
+      tags: chrony
+    - include: tasks/chrony_client.yaml
+      tags: chrony
+    - include: tasks/http_server.yaml
+      tags: http
+    - include: tasks/etc_ansible_hosts.yaml
     - include: tasks/dnsmasq_libvirt_remove.yaml
-
-    - name:
-      block:
+    - block:
       - include: tasks/tftpboot.yaml
         tags: tftp
       - include: tasks/pxe_links.yaml
-      when: rhcos_installation_method=="pxe"
-
+      when: rhcos_installation_method|upper=="PXE"
     - include: tasks/dns_server.yaml
       tags: dns
     - include: tasks/dns_interface.yaml
       tags: dns
 
 - hosts: lb
-  remote_user: root
   gather_facts: yes
   become: yes
   tasks:
@@ -80,12 +91,9 @@
       tags: haproxy
       when: manage_load_balancer is not defined or manage_load_balancer|bool
 
-- hosts:
-    - nfs
-  remote_user: root
+- hosts: nfs
   gather_facts: no
   become: yes
-
   tasks:
     - name: Prepare NFS volume
       include: tasks/prepare_xfs_volume.yaml
@@ -97,10 +105,100 @@
       include: tasks/nfs_server.yaml
       when: manage_nfs|bool
 
-- hosts: localhost
+#
+# 5. Install OpenShift
+#
+- name: Prepare and install OpenShift
+  hosts: localhost
   connection: local
   gather_facts: yes
   become: yes
   tasks:
-    - include: tasks/ocp_install_execute.yaml
-      when: run_install is defined and run_install|bool and install_script_already_run==False
+    - block: 
+      - include: tasks/ocp_install_config.yaml
+        tags: ocp_install_config
+      - include: tasks/ocp_ignition.yaml
+        tags: ignition
+        when: rhcos_installation_method|upper!="IPI"
+      - include: tasks/ocp_install_ipi.yaml
+        tags: install_ocp
+        when: rhcos_installation_method|upper=="IPI"
+      - include: tasks/create_oauth.yaml
+      when: install_script_already_run==False
+
+    - include: tasks/registry_storage.yaml
+    - include: tasks/ocp_install_scripts.yaml
+      tags: scripts
+
+- import_playbook: ocp4_vm_power_on.yaml
+  when: vm_create_vms|bool and run_install|bool and rhcos_installation_method|upper!="IPI"
+  tags: vm_power_on
+
+#
+# 6. Wait for installation to complete
+#
+- name: Wait for OpenShift installation to complete
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  become: yes
+  tasks:
+    - block: 
+      - name: Wait for bootstrap
+        shell: |
+          {{ocp_install_dir}}/scripts/wait_bootstrap.sh
+      - name: Remove bootstrap
+        shell: |
+          {{ocp_install_dir}}/scripts/remove_bootstrap.sh
+      when: run_install|bool and rhcos_installation_method|upper!="IPI"
+
+    - block:
+      - name: Wait for all nodes to become ready
+        shell: |
+          {{ocp_install_dir}}/scripts/wait_nodes_ready.sh
+      - name: Create ocadmin user
+        shell: |
+          {{ocp_install_dir}}/scripts/create_admin_user.sh
+      - name: Wait for installation to complete
+        shell: |
+          {{ocp_install_dir}}/scripts/wait_install.sh
+      - name: Wait for cluster operators to become ready
+        shell: |
+          {{ocp_install_dir}}/scripts/wait_co_ready.sh
+      when: run_install|bool
+
+#
+# 7. Create storage class(es) and configure registry
+#
+- name: Create storage class(es) and configure internal registry
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  become: yes
+  tasks:
+    - block: 
+      - name: Create NFS storage class
+        shell: |
+          {{ocp_install_dir}}/scripts/create_nfs_sc.sh
+      - name: Configure image registry storage (only when NFS)
+        shell: |
+          {{ocp_install_dir}}/scripts/create_registry_storage.sh
+      when: run_install|bool and create_nfs_sc|bool
+
+#
+# 8. Post-installation tasks
+#
+- name: Post-installation tasks
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  become: yes
+  tasks:
+    - block:
+      - name: Post-install
+        shell: |
+          {{ocp_install_dir}}/scripts/post_install.sh
+      - name: Final step ==> wait for cluster operators to become ready
+        shell: |
+          {{ocp_install_dir}}/scripts/wait_co_ready.sh
+      when: run_install|bool

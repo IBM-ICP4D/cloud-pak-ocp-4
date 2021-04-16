@@ -9,6 +9,24 @@ cluster_name="ocp45"
 default_gateway="10.99.92.1"
 
 #
+# Indicate the method by which Red Hat CoreOS will be installed. This can be one of the following values:
+# - pxe: CoreOS will be loaded on the bootstrap, masters and workers using PXE-boot. This is the default.
+# - ova: Only for VMWare. CoreOS will be loaded using a VMWare template (imported OVA file).
+# - ipi: Only for VMWare. CoreOS and OpenShift will be installed via Installer-provisioned infrastructure. OpenShift
+#        will take care of creating the required VMs and automatically assigns hostnames. If you choose this installation
+#        method, please also complete the IPI section in the inventory file.
+#
+# For pxe and ova installs you have the option of letting the prepare script create the VMs for you by setting
+# vm_create_vms=True. This can only be done if you specify the vc_user and vc_password properties at the command line.
+# If you specify run_install=True and vm_create_vms=True, the script will start the virtual machines. Otherwise, you must
+# start the bootstrap, masters and workers yourself while the script is waiting for the bootstrap.
+# When rhcos_installation_method=ipi, run_install is assumed to be True as well.
+#
+rhcos_installation_method=pxe
+vm_create_vms=False
+run_install=True
+
+#
 # OCP Installation directory
 # Depicts the directory on the bastion (current) node in which the OpenShift installation
 # artifacts will be stored.
@@ -45,13 +63,6 @@ rhcos_rootfs_package_pattern=".*(rhcos.*rootfs.x86_64.img).*"
 rhcos_ova_package_pattern=".*(rhcos.*.ova).*"
 
 #
-# Indicate the method by which Red Hat CoreOS will be installed. This can be one of the following values:
-# - pxe: CoreOS will be loaded on the bootstrap, masters and workers using PXE-boot. This is the default.
-# - ova: Only for VMWare. CoreOS will be loaded using a VMWare template (imported OVA file).
-#
-rhcos_installation_method=pxe
-
-#
 # Indicate whether to opt out of remote health checking of the OpenShift cluster
 #
 opt_out_health_checking=False
@@ -86,7 +97,7 @@ interface_script="/etc/sysconfig/network-scripts/ifcfg-ens192"
 # it will also serve the RHCOS ISO using the TFTP server.
 #
 dhcp_on_bastion=True
-dhcp_range=['10.99.92.51','10.99.92.60']
+dhcp_range=['10.99.92.51','10.99.92.70']
 
 #
 # Indicate whether the load balancer must be configured by the prepare script. If you choose to use an external load
@@ -154,8 +165,17 @@ image_registry_size=200Gi
 service_network="172.30.0.0/16"
 
 #
-# VMware envrionment specific variables. These are only used if you intend to create the VMs using the
-# vm_create.sh script. You can ignore these if you manually create the VMs.
+# Additional variables for IPI (Installer-provisioned Infrastructure) installations. 
+#
+apiVIP="10.99.92.51"
+ingressVIP="10.99.92.52"
+vm_number_of_masters=3
+vm_number_of_workers=3
+
+#
+# VMware envrionment specific properties. These are only used if you have selected the IPI installation method, or if
+# you want the prepare script to create the VMs or when using the vm_create.sh script to create these. 
+# You can ignore these properties if you manually create the VMs.
 #
 vc_vcenter="10.99.92.13"
 vc_datacenter="Datacenter1"

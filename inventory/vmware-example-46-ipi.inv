@@ -4,8 +4,8 @@ workers
 
 [all:vars]
 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
-domain_name="uk.ibm.com"
-cluster_name="ocp45"
+domain_name="coc.ibm.com"
+cluster_name="ocp46"
 default_gateway="10.99.92.1"
 
 #
@@ -22,7 +22,7 @@ default_gateway="10.99.92.1"
 # start the bootstrap, masters and workers yourself while the script is waiting for the bootstrap.
 # When rhcos_installation_method=ipi, run_install is assumed to be True as well.
 #
-rhcos_installation_method=pxe
+rhcos_installation_method=ipi
 vm_create_vms=False
 run_install=True
 
@@ -43,20 +43,8 @@ ocp_install_dir="/ocp_install"
 #
 #http_proxy="http://bastion.{{cluster_name}}.{{domain_name}}:3128"
 #https_proxy="http://bastion.{{cluster_name}}.{{domain_name}}:3128"
-#no_proxy=".{{domain_name}},10.1.0.0/16,{{service_network}},10.99.91.0/24,.svc"
+#no_proxy=".{{domain_name}},10.1.0.0/16,{{service_network}},10.99.92.0/24,.svc"
 #configure_global_proxy=True
-
-#
-# Air-gapped installation settings
-#
-air_gapped_install=True
-air_gapped_registry_server="registry.uk.ibm.com"
-air_gapped_source_ocp_release="quay.io/openshift-release-dev/ocp-release"
-air_gapped_mirror_ocp_release="{{air_gapped_registry_server}}:5000/ocp4/openshift4"
-air_gapped_source_ocp_release_dev="quay.io/openshift-release-dev/ocp-v4.0-art-dev"
-air_gapped_mirror_ocp_release_dev="{{air_gapped_registry_server}}:5000/ocp4/openshift4"
-air_gapped_registry_trust_bundle_file=/tmp/registry.crt
-air_gapped_download_dir="/ocp4_downloads"
 
 #
 # OpenShift download URLs. These are the URLs used by the prepare script to download
@@ -64,8 +52,8 @@ air_gapped_download_dir="/ocp4_downloads"
 # openshift_release property. The download scripts automatically select the relevant packages from the URL.
 #
 openshift_release="4.6"
-openshift_base_url="http://{{air_gapped_registry_server}}:8080/{{air_gapped_download_dir}}/clients/"
-rhcos_base_url="http://{{air_gapped_registry_server}}:8080/{{air_gapped_download_dir}}/dependencies/"
+openshift_base_url="https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest-{{openshift_release}}/"
+rhcos_base_url="https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/{{openshift_release}}/latest/"
 openshift_client_package_pattern=".*(openshift-client.*tar.gz).*"
 openshift_install_package_pattern=".*(openshift-install-linux.*tar.gz).*"
 rhcos_metal_package_pattern=".*(rhcos.*metal.*raw.gz).*"
@@ -85,10 +73,10 @@ opt_out_health_checking=False
 # bastion node instead of a public NTP server. If you use the bastion node as the NTP server, 
 # you have to specify which range of servers will be allowed to synchronize
 # themselves with the bastion node; you can do this in the ntp_allow property.
-# Finally, specify a list of external servers withh which the nodes will by synchronized, for example:
+# Finally, specify a list of external servers with which the nodes will by synchronized, for example:
 # ntp_server=['0.rhel.pool.ntp.org', '1.rhel.pool.ntp.org'].
 #
-setup_chrony_server=True
+setup_chrony_server=False
 ntp_allow="10.99.92.0/24"
 ntp_servers=['10.99.240.1']
 override_chrony_settings_on_cluster_nodes=True
@@ -105,10 +93,11 @@ interface_script="/etc/sysconfig/network-scripts/ifcfg-ens192"
 # and worker will get an fixed IP address from the dnsmasq DHCP server. Specify a range of addresses from which the 
 # DHCP server can issue an IP address. Every node configured in the bootstrap, masters and workers sections below will 
 # have a specific dhcp-server entry in the dnsmasq configuration, specifying the IP address they will be assigned by
-# the DHCP server.
+# the DHCP server. If the DHCP server runs on the bastion node and the RHCOS installation (rhcos_installation_method) is PXE,
+# it will also serve the RHCOS ISO using the TFTP server.
 #
 dhcp_on_bastion=True
-dhcp_range=['10.99.92.51','10.99.92.60']
+dhcp_range=['10.99.92.53','10.99.92.70']
 
 #
 # Indicate whether the load balancer must be configured by the prepare script. If you choose to use an external load
@@ -127,10 +116,6 @@ http_server_port=8090
 # Set up desktop on the bastion node
 setup_desktop=False
 
-# Set the bastion hostname as part of the preparation. If set to True, the bastion hostname will be set to
-# <bastion_host>.<cluster_name>.<domain_name>
-set_bastion_hostname=False
-
 #
 # If manage_nfs is True, the Ansible script will try to format and mount the NFS volume configured in the nfs_volume*
 # properties on the server indicated in the [nfs] section. If the value is False, the nfs server referred to in the [nfs]
@@ -142,10 +127,12 @@ set_bastion_hostname=False
 # command; you can specify the size (such as 500G) or any unique string that identifies
 # the device (such as sdb).
 #
-# The "nfs_volume_mount_path" indicates the mount point that is created for the device.
+# The "nfs_volume_mount_path" indicates the mount point that is created for the device. Even if you are not managing NFS
+# yourself, but are using an external NFS server for NFS storge class, you should configure the path that must be mounted.
 #
 manage_nfs=True
 nfs_volume_selector="sdb"
+
 nfs_volume_mount_path="/nfs"
 
 #
@@ -182,24 +169,16 @@ vm_number_of_masters=3
 vm_number_of_workers=3
 
 #
-# VMware envrionment specific properties. These are only used if you have selected the IPI installation method, or if
-# you want the prepare script to create the VMs or when using the vm_create.sh script to create these. 
-# You can ignore these properties if you manually create the VMs.
+# VMware envrionment specific properties. These are required for the IPI installation method.
 #
 vc_vcenter="10.99.92.13"
 vc_datacenter="Datacenter1"
 vc_datastore="Datastore1"
 vc_cluster="Cluster1"
 vc_res_pool="resourcepool"
-vc_folder="fkocp45"
-vc_guest_id="rhel7_64Guest"
+vc_folder="fkocp46"
 vc_network="VM Network"
 vm_template="/Datacenter1/vm/Templates/RHCOS_4.6.8"
-
-# Bootstrap VM properties
-vm_bootstrap_mem=16384
-vm_bootstrap_cpu=4
-vm_bootstrap_disk=100
 
 # Master VM properties
 vm_master_mem=32768
@@ -221,14 +200,10 @@ vm_worker_disk=200
 10.99.92.50 host="bastion"
 
 [bootstrap]
-10.99.92.51 host="bootstrap" mac="xx:xx:xx:xx:xx:xx"
+# Ignored for IPI installations
 
 [masters]
-10.99.92.52 host="master-1" mac="xx:xx:xx:xx:xx:xx"
-10.99.92.53 host="master-2" mac="xx:xx:xx:xx:xx:xx"
-10.99.92.54 host="master-3" mac="xx:xx:xx:xx:xx:xx"
+# Ignored for IPI installations
 
 [workers]
-10.99.92.55 host="worker-1" mac="xx:xx:xx:xx:xx:xx"
-10.99.92.56 host="worker-2" mac="xx:xx:xx:xx:xx:xx"
-10.99.92.57 host="worker-3" mac="xx:xx:xx:xx:xx:xx"
+# Ignored for IPI installations

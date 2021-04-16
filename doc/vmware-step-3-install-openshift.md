@@ -6,12 +6,6 @@ Go to the vSphere web interface of your ESX infrastructure and log in.
 
 Find the VM folder that holds the cluster VMs and start the bootstrap, masters and workers.
 
-Alternatively, if you have created the envronment using a script, you can start the environment:
-```
-cd ~/cloud-pak-ocp-4
-./vm_poweron.sh -i inventory/<inventory-file> [other parameters...]
-```
-
 ![vSphere Start control plane](/images/vsphere-start-nodes.png)
 
 ## Wait for bootstrap to complete
@@ -22,7 +16,7 @@ The bootstrapping of the control plane can take up to 30 minutes. Run the follow
 
 You should see something like this:
 ```
-INFO Waiting up to 30m0s for the Kubernetes API at https://api.ocp43.uk.ibm.com:6443...
+INFO Waiting up to 30m0s for the Kubernetes API at https://api.ocp45.coc.ibm.com:6443...
 INFO API v1.16.2 up
 INFO Waiting up to 30m0s for bootstrapping to complete...
 INFO It is now safe to remove the bootstrap resources
@@ -55,13 +49,13 @@ oc get no
 
 Repeat the `oc get csr` and `oc get no` commands until you see all workers added to your cluster.
 
-## Create OpenShift admin user
-Rather than using `kubeadmin` to operate OpenShift, we're creating an OpenShift `admin` user. The script below will create the `admin` user with the password that was set in the environment variable `ocp_admin_password`.
+## Create OpenShift administrator user
+Rather than using `kubeadmin` to operate OpenShift, we're creating an OpenShift administrator user. The script below will create the `ocadmin` user with the password that was set in the environment variable `ocp_admin_password`.
 ```
 /ocp_install/scripts/create_admin_user.sh
 ```
 
-You can ignore the `Warning: User 'admin' not found` message. Once the script has run, a new authentication mechanism will be added to the `authentication` cluster operator. This will take a few minutes and only once finished you can log on with the `admin` user.
+You can ignore the `Warning: User 'ocadmin' not found` message. Once the script has run, a new authentication mechanism will be added to the `authentication` cluster operator. This will take a few minutes and only once finished you can log on with the `ocadmin` user.
 
 ## Wait for installation to complete
 Now wait for the installation to complete. This should be very quick, but could take up to 30 minutes.
@@ -71,11 +65,11 @@ Now wait for the installation to complete. This should be very quick, but could 
 
 Something like the following should be displayed:
 ```
-INFO Waiting up to 30m0s for the cluster at https://api.ocp43.uk.ibm.com:6443 to initialize...
+INFO Waiting up to 30m0s for the cluster at https://api.ocp45.coc.ibm.com:6443 to initialize...
 INFO Waiting up to 10m0s for the openshift-console route to be created...
 INFO Install complete!
 INFO To access the cluster as the system:admin user when using 'oc', run 'export KUBECONFIG=/ocp_install/auth/kubeconfig'
-INFO Access the OpenShift web-console here: https://console-openshift-console.apps.ocp43.uk.ibm.com
+INFO Access the OpenShift web-console here: https://console-openshift-console.apps.ocp45.coc.ibm.com
 INFO Login to the console with user: kubeadmin, password: Fo9wP-taw47-6ujnV-jwT2k
 ```
 
