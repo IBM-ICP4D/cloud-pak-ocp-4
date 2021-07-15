@@ -1,18 +1,18 @@
-# Setting up OCS on an OCP 4.x installation provisioned on VMWare
+# Setting up OCS on an OCP 4.x installation provisioned on VMWare with local storage on the workers
 
-Using steps found here: https://access.redhat.com/documentation/en-us/red_hat_openshift_container_storage/4.5/html/deploying_openshift_container_storage_on_vmware_vsphere/deploy-using-local-storage-devices-vmware and here https://red-hat-storage.github.io/ocs-training/training/ocs4/ocs-localdevice-blog.html (for the infra nodes steps).
+Using steps found here: https://access.redhat.com/documentation/en-us/red_hat_openshift_container_storage/4.6/html/deploying_openshift_container_storage_on_vmware_vsphere/deploy-using-local-storage-devices-vmware.
 
 ## Pre-requisites
 The steps in this document assume you have 3 (dedicated) worker nodes in the cluster, each with one additional large raw disk (for Ceph). In the example below the disks are sized 200 GB
 
 ## Log in to OpenShift
 ```
-oc login -u admin -p passw0rd
+oc login -u ocadmin -p passw0rd
 ```
 
-## Add labels to the workers
+## Add labels and taints to the workers
 ```
-ocs_nodes='ocs-1.ocp45.uk.ibm.com ocs-2.ocp45.uk.ibm.com ocs-3.ocp45.uk.ibm.com"
+ocs_nodes='ocs-1.ocp46.uk.ibm.com ocs-2.ocp46.uk.ibm.com ocs-3.ocp46.uk.ibm.com'
 for ocs_node in $ocs_nodes;do
   oc label nodes $ocs_node cluster.ocs.openshift.io/openshift-storage="" --overwrite
   oc label nodes $ocs_node node-role.kubernetes.io/infra="" --overwrite
@@ -29,7 +29,7 @@ You can install the operator using the OpenShift console.
 - Find `OpenShift Container Storage`
 - Install
 - Select `A specific namespace on the cluster`, namespace `openshift-storage` will be created automatically
-- Update channel: stable-4.5
+- Update channel: stable-4.6
 - Click Install
 
 ### Wait until the pods are running
@@ -39,17 +39,11 @@ watch -n 5 "oc get po -n openshift-storage"
 
 Expected output:
 ```
-Every 5.0s: oc get po -n openshift-storage
-
-NAME                                 READY   STATUS    RESTARTS   AGE
-noobaa-operator-69bb7cd87d-hdnt6     1/1     Running   0          75m
-ocs-operator-6b66b56cf8-xbhgj        1/1     Running   0          75m
-rook-ceph-operator-d9cccc9bc-mmf4z   1/1     Running   0          75m
-```
-
-## Create namespace for local storage
-```
-oc adm new-project local-storage
+NAME                                    READY   STATUS    RESTARTS   AGE
+noobaa-operator-7688b8849d-xzlgm        1/1     Running   0          37m
+ocs-metrics-exporter-776fffcf89-w2hmq   1/1     Running   0          37m
+ocs-operator-6b8455554f-frr89           1/1     Running   0          37m
+rook-ceph-operator-6457794bc-zqbt7      1/1     Running   0          37m
 ```
 
 ## Install local storage operator
@@ -60,49 +54,31 @@ You can install the operator using the OpenShift console.
 - Go to Administrator --> Operators --> OperatorHub
 - Find `Local Storage`
 - Install
-- Specify namespace `local-storage`
-- Update channel: 4.5
+- Specify namespace `openshift-local-storage`
+- Update channel: 4.6
 - Click Install
 
 ### Wait until the operator is running
 ```
-watch -n 5 "oc get po -n local-storage"
+watch -n 5 "oc get csv -n openshift-local-storage"
 ```
 
-## Create storage class for the Ceph file system
-The `devicePaths` should list the path to the large disks that will be used for the data.
-```
-cat << EOF > /tmp/localblock.yaml
-apiVersion: local.storage.openshift.io/v1
-kind: LocalVolume
-metadata:
-  name: localblock
-  namespace: local-storage
-  labels:
-    app: ocs-storagecluster
-spec:
-  tolerations:
-  - key: "node.ocs.openshift.io/storage"
-    value: "true"
-    effect: NoSchedule
-  nodeSelector:
-    nodeSelectorTerms:
-    - matchExpressions:
-        - key: cluster.ocs.openshift.io/openshift-storage
-          operator: In
-          values:
-          - ""
-  storageClassDevices:
-    - storageClassName: localblock
-      volumeMode: Block
-      devicePaths:
-        - /dev/sdb
-EOF
+## Create storage cluster
+- Open OpenShift console
+- Go to Administrator --> Opoerators --> Installed Operators
+- Select `openshift-storage` as the project
+- Click on OpenShift Container Storage
+- Under Storage Cluster, click on Create instance
+- Select `Internal - Attached Devices` for Mode
+- Select nodes
+- Select `ocs-1`, `ocs-2` and `ocs-3` and click Next
+- Wait for a bit so that OpenShift can interrogate the workers
+- Enter `local-volume-sdb` for the Volume Set Name
+- Click Advanced and select the disk size, for example Min: 200 GiB, Max: 200 GiB
+- Select `local-volume-sdb` for the Storage Class
+- Click Create
 
-oc apply -f /tmp/localblock.yaml
-```
-
-Wait until PVs for `localblock` storage class have been created; each PV is 200 GB.
+Wait until PVs for `local-volume-sdb` storage class have been created; each PV is 200 GB.
 ```
 watch -n 5 'oc get pv'
 ```
@@ -119,9 +95,17 @@ watch -n 5 'oc get pv'
 - Select `localblock` for Storage Class
 - Click `Create`
 
+OCS will also automatically create the Ceph storage classes.
+
 ## Wait until all pods are up and running
+The storage cluster will be ready when the `ocs-operator` pod is ready.
 ```
 watch -n 5 'oc get pod -n openshift-storage'
+```
+
+## Wait for the storage cluster to be created
+```
+watch -n 10 'oc get po -n openshift-storage
 ```
 
 Wait until the OCS operator pod `ocs-operator-xxxxxxxx-yyyyy` is running with READY=`1/1`. You will see more than 20 pods starting in the `openshift-storage` namespace.
