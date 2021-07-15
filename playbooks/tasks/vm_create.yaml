@@ -6,7 +6,7 @@
     hostname: "{{ vc_vcenter }}"
     username: "{{ vc_user }}"
     password: "{{ vc_password }}"
-    validate_certs: no
+    validate_certs: yes
     datacenter: "{{ vc_datacenter }}"
     cluster: "{{ vc_cluster }}"
     resource_pool: "{{ vc_res_pool }}"
@@ -31,14 +31,14 @@
     - "{{ groups[ocp_group] }}"
   delegate_to: localhost
   register: vm_guest_facts_pxe
-  when: rhcos_installation_method=="pxe"
+  when: rhcos_installation_method|upper=="PXE"
 
 - name: Create {{ ocp_group }} VMs using template {{vm_template}}
   vmware_guest:
     hostname: "{{ vc_vcenter }}"
     username: "{{ vc_user }}"
     password: "{{ vc_password }}"
-    validate_certs: no
+    validate_certs: yes
     datacenter: "{{ vc_datacenter }}"
     cluster: "{{ vc_cluster }}"
     resource_pool: "{{ vc_res_pool }}"
@@ -64,7 +64,7 @@
     - "{{ groups[ocp_group] }}"
   delegate_to: localhost
   register: vm_guest_facts_ova
-  when: rhcos_installation_method=="ova"
+  when: rhcos_installation_method|upper=="OVA"
 
 - name: Register in inventory file (if empty VMs)
   replace:
@@ -72,7 +72,7 @@
     regexp: '^(.*{{ item.item }}.*mac=)"(.*)"(.*)?$'
     replace: '\1"{{ item.instance.hw_eth0.macaddress }}"\3'
   with_items: "{{ vm_guest_facts_pxe.results }}"
-  when: rhcos_installation_method=="pxe"
+  when: rhcos_installation_method|upper=="PXE"
 
 - name: Register in inventory file (when using template)
   replace:
@@ -80,7 +80,7 @@
     regexp: '^(.*{{ item.item }}.*mac=)"(.*)"(.*)?$'
     replace: '\1"{{ item.instance.hw_eth0.macaddress }}"\3'
   with_items: "{{ vm_guest_facts_ova.results }}"
-  when: rhcos_installation_method=="ova"
+  when: rhcos_installation_method|upper=="OVA"
 
 
 - meta: refresh_inventory

@@ -2,9 +2,6 @@
 
 export KUBECONFIG={{ocp_install_dir}}/auth/kubeconfig
 
-echo "Removing kubeadmin user"
-oc delete secrets kubeadmin -n kube-system
-
 {% if opt_out_health_checking is defined and opt_out_health_checking %}
 echo "Opt out of remote health checking"
 oc extract secret/pull-secret -n openshift-config --to=/tmp
