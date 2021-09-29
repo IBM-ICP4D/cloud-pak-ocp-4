@@ -11,15 +11,19 @@
       vars:
         ocp_group: bootstrap
         node_type: bootstrap
+        ignition_file_name: bootstrap-ova.ign
         
     - name: Update vApp of master vms
       include: tasks/vm_update_vapp.yaml
       vars:
         ocp_group: masters
         node_type: master
+        ignition_file_name: master.ign
 
     - name: Update vApp of worker vms
       include: tasks/vm_update_vapp.yaml
       vars:
         ocp_group: workers
         node_type: worker
+        ignition_file_name: worker.ign
+        

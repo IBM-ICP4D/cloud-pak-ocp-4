@@ -17,7 +17,7 @@
       - id: "guestinfo.ignition.config.data.encoding"
         value: "base64"
       - id: "guestinfo.ignition.config.data"
-        value: "{{ lookup('file', ocp_install_dir+'/'+cluster_name+'-'+node_type+'.ign') | b64encode }}"
+        value: "{{ lookup('file', ocp_install_dir+'/'+ignition_file_name) | b64encode }}"
       - id: "disk.EnableUUID"
         value: "TRUE"
   with_items:

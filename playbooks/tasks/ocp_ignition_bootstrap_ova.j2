@@ -1,0 +1,28 @@
+{% if openshift_release < "4.6" %}
+{
+   "ignition": {
+     "config": {
+       "merge": [
+         {
+           "source": "http://{{groups['bastion'][0]}}:{{http_server_port}}/{{ocp_install_dir}}/bootstrap.ign"
+         }
+       ]
+     },
+     "version": "2.2.0"
+   }
+ }
+{% endif %}
+{% if openshift_release >= "4.6" %}
+{
+   "ignition": {
+     "config": {
+       "merge": [
+         {
+           "source": "http://{{groups['bastion'][0]}}:{{http_server_port}}/{{ocp_install_dir}}/bootstrap.ign"
+         }
+       ]
+     },
+     "version": "3.1.0"
+   }
+ }
+ {% endif %}
