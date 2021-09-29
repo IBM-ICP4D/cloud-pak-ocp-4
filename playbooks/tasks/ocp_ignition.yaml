@@ -80,13 +80,37 @@
 
 - name: Restore SELinux context for ignition files
   shell: restorecon -Rv "{{ocp_install_dir}}/*.ign"
+  when: ansible_selinux.status=='enabled' 
+
+- name: Generate ignition file for bootstrap server OVA installation
+  template:
+    src: ocp_ignition_bootstrap_ova.j2
+    dest: "{{ocp_install_dir}}/bootstrap-ova.ign"
+  when: rhcos_installation_method|upper=="OVA"
 
 - name: Generate base64 ignition files for OVA installation
   copy:
     content: "{{ lookup('file',item) | b64encode }}"
     dest: "{{item}}.64"
   with_items:
-    - "{{ocp_install_dir}}/bootstrap.ign"
+    - "{{ocp_install_dir}}/bootstrap-ova.ign"
     - "{{ocp_install_dir}}/master.ign"
     - "{{ocp_install_dir}}/worker.ign"
   when: rhcos_installation_method|upper=="OVA"
+
+- name: Allow nginx to read base64 ignition files (SELinux)
+  sefcontext:
+    target: '{{ ocp_install_dir }}/.*\.ign\.64'
+    setype: httpd_sys_content_t
+    seuser: system_u
+    ftype: a
+    state: present
+  when: 
+  - ansible_selinux.status=='enabled'
+  - rhcos_installation_method|upper=="OVA"
+
+- name: Restore SELinux context for ignition files
+  shell: restorecon -Rv "{{ocp_install_dir}}/*.ign.64"
+  when: 
+  - ansible_selinux.status=='enabled'
+  - rhcos_installation_method|upper=="OVA"
