@@ -45,7 +45,7 @@ cd ~/cloud-pak-ocp-4
 
 Before the user can create the machines a template needs to be created within the VMWare environment. From the folder that is house the templates right click and select "Deploy OVF Template"
 
-[Deploy OVF Template](../images/deploy-ovf-template.png),
+![Deploy OVF Template](/images/deploy-ovf-template.png),
 
 
 
