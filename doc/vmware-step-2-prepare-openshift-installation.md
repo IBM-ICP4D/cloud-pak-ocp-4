@@ -73,19 +73,10 @@ If the creation can be automated the creation of the machines can ve accomplishe
 
 ```
 cd ~/cloud-pak-ocp-4
-./vm-update-vapps.sh -i inventory/<inventory-file> 
+./vm-create.sh -i inventory/<inventory-file> 
 ```
 
-The user will be prompted for the vmuser id and password
-
-The machines will need to be updated with the correct vApps parameters. The following script can be used to update these paramaters:
-
-```
-cd ~/cloud-pak-ocp-4
-./vm-update-vapps.sh -i inventory/<inventory-file> 
-```
-
-
+The use will be prompted for the user id and password of the VMWare account. All machines in the inventory file will be created. 
 
 After setting up the machines run the following to prepare the installation of openshift
 
@@ -93,6 +84,16 @@ After setting up the machines run the following to prepare the installation of o
 cd ~/cloud-pak-ocp-4
 ./prepare.sh -i inventory/<inventory-file> -e vc_user=<vsphere-user> -e vc_password=<vsphere-password> [other parameters...]
 ```
+
+After the prepare script has finished the VMWare machines will need to be configured withthe ignition files and a couple of extra parameters. This can be accomplished with the following script
+
+```
+cd ~/cloud-pak-ocp-4
+./vm-update-vapps.sh -i inventory/<inventory-file> 
+```
+
+The user will be prompted for the WMWare user id and password
+
 
 ### IPI Install if your vSphere user can create VMs
 If your vSphere user can create VMs and you are performing and IPI installation or can have the preparation script create the virtual machines, run the script as follows:
