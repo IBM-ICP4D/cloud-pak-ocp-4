@@ -45,7 +45,21 @@ cd ~/cloud-pak-ocp-4
 
 Before the user can create the machines a template needs to be created within the VMWare environment. From the folder that is house the templates right click and select "Deploy OVF Template"
 
-![Deploy OVF Template](/images/deploy-ovf-template.png),
+![Deploy OVF Template](/images/deploy-ovf-template.png)
+
+Enter the details of the OVA file to use for the template. The ova file to use for the template is being served by the bastion node http server from the ocp_install directory. Enter the details of the ova fle to use for the template 
+
+![Select OVF Template](/images/select-ovf-template.png)
+
+Follow the necessary steps to select the name and folder of the template, the vmware compute resource to use. Review the details. Finally select the VMWare storage to use and complte the creation of the template.
+
+After creation the machine created needs to be converted to a template. Right click on the machine created above and select Template -> Convert to Template
+
+![Convert to Template](/images/convert-to-template.png)
+
+
+
+
 
 
 
