@@ -32,7 +32,7 @@ export root_password=<the root password of the servers>
 export ocp_admin_password=<The OCP password you want to set for the admin console>
 ```
 
-### UPI OVF Install
+### OVA Install
 
 If you are doing a UPI with OVF templates then there are a few extra steps that need to be excuted before installation. First the install binaries should be downloaded to the bastion using the following command:
 
@@ -41,7 +41,7 @@ cd ~/cloud-pak-ocp-4
 ./prepare.sh -i inventory/<inventory-file> --skip-install
 ```
 
-#### Prepare the VMWare environment for the creation of machines
+#### Prepare the VMWare environment for the creation of machines (OVA install)
 
 Before the user can create the machines a template needs to be created within the VMWare environment. From the folder that is house the templates right click and select "Deploy OVF Template"
 
@@ -57,20 +57,13 @@ After creation the machine created needs to be converted to a template. Right cl
 
 ![Convert to Template](/images/convert-to-template.png)
 
-
-
-
-
-
-
-#### Create the VMware machines
+#### Create the VMWare machines (OVA install)
 
 The machines can be create manually or if the installer has the correct permissions the creation of the machines can be automated.
 
 With the manual approach the VMWare admin creates the machines with the appropriate compute, memory and storage using as a base the templated created in the previous section
 
 If the creation can be automated the creation of the machines can ve accomplished using the following script:
-
 ```
 cd ~/cloud-pak-ocp-4
 ./vm-create.sh -i inventory/<inventory-file> 
@@ -78,22 +71,19 @@ cd ~/cloud-pak-ocp-4
 
 The use will be prompted for the user id and password of the VMWare account. All machines in the inventory file will be created. 
 
-After setting up the machines run the following to prepare the installation of openshift
-
+After setting up the machines run the following to prepare the installation of OpenShift.
 ```
 cd ~/cloud-pak-ocp-4
 ./prepare.sh -i inventory/<inventory-file> -e vc_user=<vsphere-user> -e vc_password=<vsphere-password> [other parameters...]
 ```
 
-After the prepare script has finished the VMWare machines will need to be configured withthe ignition files and a couple of extra parameters. This can be accomplished with the following script
-
+After the prepare script has finished the VMWare machines will need to be configured withthe ignition files and a couple of extra parameters. This can be accomplished with the following script:
 ```
 cd ~/cloud-pak-ocp-4
 ./vm-update-vapps.sh -i inventory/<inventory-file> 
 ```
 
-The user will be prompted for the WMWare user id and password
-
+The user will be prompted for the VMWare user id and password.
 
 ### IPI Install if your vSphere user can create VMs
 If your vSphere user can create VMs and you are performing and IPI installation or can have the preparation script create the virtual machines, run the script as follows:
@@ -102,7 +92,6 @@ If your vSphere user can create VMs and you are performing and IPI installation 
 cd ~/cloud-pak-ocp-4
 ./prepare.sh -i inventory/<inventory-file> -e vc_user=<vsphere-user> -e vc_password=<vsphere-password> [other parameters...]
 ```
-
 
 ### Install if the VMs have been pre-created
 On the bastion node, you must run the script that will prepare the installation of OpenShift 4.x.
