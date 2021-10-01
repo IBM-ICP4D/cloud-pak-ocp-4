@@ -7,6 +7,8 @@ if [ "$#" -lt 2 ]; then
     exit 1
 fi
 
+SKIP_INSTALL="False"
+
 # Parse parameters
 PARAMS=""
 while (( "$#" )); do
@@ -14,6 +16,10 @@ while (( "$#" )); do
     -i)
       INVENTORY_FILE_PARAM=$2
       shift 2
+      ;;
+    --skip-install)
+      SKIP_INSTALL="True"
+      shift
       ;;
     *) # preserve remaining arguments
       PARAMS="$PARAMS $1"
@@ -72,6 +78,7 @@ ansible-playbook -i $inventory_file playbooks/ocp4.yaml \
   -e pull_secret_file=$pull_secret_file \
   -e script_dir=$SCRIPT_DIR \
   -e inventory_file=$inventory_file \
+  -e SKIP_INSTALL=$SKIP_INSTALL \
   "$@"
 
 ANSIBLE_EXIT_CODE=$?
