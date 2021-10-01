@@ -124,14 +124,20 @@
         tags: install_ocp
         when: rhcos_installation_method|upper=="IPI"
       - include: tasks/create_oauth.yaml
-      when: install_script_already_run==False
+      when: 
+      - install_script_already_run==False
+      - not skip_install
 
     - include: tasks/registry_storage.yaml
     - include: tasks/ocp_install_scripts.yaml
       tags: scripts
 
 - import_playbook: ocp4_vm_power_on.yaml
-  when: vm_create_vms|bool and run_install|bool and rhcos_installation_method|upper!="IPI"
+  when: 
+  - vm_create_vms|bool 
+  - run_install|bool 
+  - rhcos_installation_method|upper!="IPI"
+  - not skip_install
   tags: vm_power_on
 
 #
@@ -150,7 +156,10 @@
       - name: Remove bootstrap
         shell: |
           {{ocp_install_dir}}/scripts/remove_bootstrap.sh
-      when: run_install|bool and rhcos_installation_method|upper!="IPI"
+      when: 
+      - run_install|bool 
+      - rhcos_installation_method|upper!="IPI"
+      - not skip_install
 
     - block:
       - name: Wait for all nodes to become ready
@@ -165,7 +174,9 @@
       - name: Wait for cluster operators to become ready
         shell: |
           {{ocp_install_dir}}/scripts/wait_co_ready.sh
-      when: run_install|bool
+      when: 
+      - run_install|bool
+      - not skip_install
 
 #
 # 7. Create storage class(es) and configure registry
@@ -183,7 +194,10 @@
       - name: Configure image registry storage (only when NFS)
         shell: |
           {{ocp_install_dir}}/scripts/create_registry_storage.sh
-      when: run_install|bool and create_nfs_sc|bool
+      when: 
+      - run_install|bool 
+      - create_nfs_sc|bool
+      - not skip_install
 
 #
 # 8. Post-installation tasks
