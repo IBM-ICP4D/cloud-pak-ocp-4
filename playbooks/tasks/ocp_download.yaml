@@ -164,3 +164,12 @@
     owner: root
     mode: 0644
   when: rhcos_installation_method|upper=="OVA"
+
+- name: Allow nginx to access the OVA file (SELinux)
+  sefcontext:
+    target: "{{ocp_install_dir}}/{{rhcos_ova_package}}"
+    setype: httpd_sys_content_t
+    seuser: system_u
+    ftype: a
+    state: present
+  when: rhcos_installation_method|upper=="OVA" and ansible_selinux.status=='enabled'
