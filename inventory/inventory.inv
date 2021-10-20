@@ -1,0 +1,226 @@
+[all:children]
+masters
+workers
+
+[all:vars]
+ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+domain_name="ocp.cennso.com"
+cluster_name="ibm-01"
+default_gateway="10.75.122.130"
+netmask="255.255.255.192"
+
+#
+# Indicate the method by which Red Hat CoreOS will be installed. This can be one of the following values:
+# - pxe: CoreOS will be loaded on the bootstrap, masters and workers using PXE-boot. This is the default.
+# - ova: Only for VMWare. CoreOS will be loaded using a VMWare template (imported OVA file).
+# - ipi: Only for VMWare. CoreOS and OpenShift will be installed via Installer-provisioned infrastructure. OpenShift
+#        will take care of creating the required VMs and automatically assigns hostnames. If you choose this installation
+#        method, please also complete the IPI section in the inventory file.
+#
+# For pxe and ova installs you have the option of letting the prepare script create the VMs for you by setting
+# vm_create_vms=True. This can only be done if you specify the vc_user and vc_password properties at the command line.
+# If you specify run_install=True and vm_create_vms=True, the script will start the virtual machines. Otherwise, you must
+# start the bootstrap, masters and workers yourself while the script is waiting for the bootstrap.
+# When rhcos_installation_method=ipi, run_install is assumed to be True as well.
+#
+rhcos_installation_method=pxe
+vm_create_vms=False
+run_install=True
+
+#
+# OCP Installation directory
+# Depicts the directory on the bastion (current) node in which the OpenShift installation
+# artifacts will be stored.
+#
+ocp_install_dir="/ocp_install"
+
+#
+# Proxy settings. If the nodes can only reach the internet through a proxy, the proxy server must be configured
+# in the OpenShift installation configuration file. Make sure that you specify all 3 properties: http_proxy, https_proxy
+# and no_proxy. Property no_proxy must contain the domain name, the k8s internal addresses (10.1.0.0/16 and 172.30.0.0/16),
+# the internal services domain (.svc) and the IP range of the cluster nodes (for example 192.168.1.0/24).
+# Additionally, if the bastion (and other non-cluster nodes) have not yet 
+# been configured with a global proxy environment variable, the preparation script can add this to the profile of all users.
+#
+#http_proxy="http://bastion.{{cluster_name}}.{{domain_name}}:3128"
+#https_proxy="http://bastion.{{cluster_name}}.{{domain_name}}:3128"
+#no_proxy=".{{domain_name}},10.1.0.0/16,{{service_network}},10.99.92.0/24,.svc"
+#configure_global_proxy=True
+
+#
+# OpenShift download URLs. These are the URLs used by the prepare script to download
+# the packages needed. If you want to install a different release of OpenShift, it is sufficient to change the
+# openshift_release property. The download scripts automatically select the relevant packages from the URL.
+#
+openshift_release="4.8"
+openshift_base_url="https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest-{{openshift_release}}/"
+rhcos_base_url="https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/{{openshift_release}}/latest/"
+openshift_client_package_pattern=".*(openshift-client.*tar.gz).*"
+openshift_install_package_pattern=".*(openshift-install-linux.*tar.gz).*"
+rhcos_metal_package_pattern=".*(rhcos.*metal.*raw.gz).*"
+rhcos_kernel_package_pattern=".*(rhcos.*-kernel.x86_64).*"
+rhcos_initramfs_package_pattern=".*(rhcos.*initramfs.x86_64.img).*"
+rhcos_rootfs_package_pattern=".*(rhcos.*rootfs.x86_64.img).*"
+rhcos_ova_package_pattern=".*(rhcos.*.ova).*"
+
+#
+# Indicate whether to opt out of remote health checking of the OpenShift cluster
+#
+opt_out_health_checking=False
+
+#
+# Indicates whether the chrony NTP service must be enabled on the bastion node. If enabled,
+# all OpenShift nodes, bootstrap, masters and workers will synchronize their times with the
+# bastion node instead of a public NTP server. If you use the bastion node as the NTP server, 
+# you have to specify which range of servers will be allowed to synchronize
+# themselves with the bastion node; you can do this in the ntp_allow property.
+# Finally, specify a list of external servers with which the nodes will by synchronized, for example:
+# ntp_server=['0.rhel.pool.ntp.org', '1.rhel.pool.ntp.org'].
+#
+setup_chrony_server=False
+ntp_allow="0.0.0.0/0"
+ntp_servers=['0.rhel.pool.ntp.org', '1.rhel.pool.ntp.org']
+override_chrony_settings_on_cluster_nodes=True
+
+#
+# A DNS server (dnsmasq) will be set up on the bastion node. Specify the upstream name server
+# that dnsmasq will use.
+#
+external_name_servers=['8.8.8.8']
+interface_script="/etc/sysconfig/network-scripts/ifcfg-eth0"
+
+#
+# Indicate whether DHCP and TFTP must run on the bastion node as part of dnsmasq. When using PXE boot, the masters 
+# and worker will get an fixed IP address from the dnsmasq DHCP server. Specify a range of addresses from which the 
+# DHCP server can issue an IP address. Every node configured in the bootstrap, masters and workers sections below will 
+# have a specific dhcp-server entry in the dnsmasq configuration, specifying the IP address they will be assigned by
+# the DHCP server. If the DHCP server runs on the bastion node and the RHCOS installation (rhcos_installation_method) is PXE,
+# it will also serve the RHCOS ISO using the TFTP server.
+#
+dhcp_on_bastion=True
+dhcp_range=['10.75.122.131','static']
+
+#
+# Indicate whether the load balancer must be configured by the prepare script. If you choose to use an external load
+# balancer, set the manage_load_balancer property to False. You can still configure the load balancer under the [lb]
+# section.
+#
+manage_load_balancer=True
+
+#
+# Indicate the port that the HTTP server (nginx) on the bastion node will listen on. The HTTP server provides access
+# to the ignition files required at boot time of the bootstrap, masters and workers, as well as PXE boot assets such as
+# RHCOS ISO.
+#
+http_server_port=8090
+
+# Set up desktop on the bastion node
+setup_desktop=False
+
+# Set the bastion hostname as part of the preparation. If set to True, the bastion hostname will be set to
+# <bastion_host>.<cluster_name>.<domain_name>
+set_bastion_hostname=False
+
+#
+# If manage_nfs is True, the Ansible script will try to format and mount the NFS volume configured in the nfs_volume*
+# properties on the server indicated in the [nfs] section. If the value is False, the nfs server referred to in the [nfs]
+# section will still be used to configure the nfs-client storage class if specified. However in that case, it is assumed
+# that an external NFS server is available which is not configured by the Ansible playbooks.
+#
+# Volume parameters: these parameters indicate which volume the preparation scripts have to
+# format and mount. The "selector" parameter is used to find the device using the lsblk
+# command; you can specify the size (such as 500G) or any unique string that identifies
+# the device (such as sdb).
+#
+# The "nfs_volume_mount_path" indicates the mount point that is created for the device. Even if you are not managing NFS
+# yourself, but are using an external NFS server for NFS storge class, you should configure the path that must be mounted.
+#
+manage_nfs=False
+nfs_volume_selector="sdb"
+
+nfs_volume_mount_path="/nfs"
+
+#
+# Storageclass parameters: indicate whether NFS and/or Portworx storage classes must be created
+#
+
+# Create nfs-client storage class?
+create_nfs_sc=True
+
+# Install Portworx and create storage classes?
+create_portworx_sc=False
+
+#
+# Registry storage class and size to be used when image registry is configured. If NFS is used for
+# the image registry, the storage class is typically nfs-client. For OCS, it would be ocs-storagecluster-cephfs.
+#
+image_registry_storage_class=ocs-storagecluster-cephfs
+image_registry_size=200Gi
+
+# This variable configures the subnet in which services will be created in the OpenShift Container Platform SDN.
+# Specify a private block that does not conflict with any existing network blocks in your infrastructure to which pods,
+# nodes, or the master might require access to, or the installation will fail. Defaults to 172.30.0.0/16,
+# and cannot be re-configured after deployment. If changing from the default, avoid 172.17.0.0/16,
+# which the docker0 network bridge uses by default, or modify the docker0 network.
+#
+service_network="172.30.0.0/16"
+
+#
+# Additional variables for IPI (Installer-provisioned Infrastructure) installations. 
+#
+apiVIP="10.99.92.51"
+ingressVIP="10.99.92.52"
+vm_number_of_masters=3
+vm_number_of_workers=3
+
+#
+# VMware envrionment specific properties. These are only used if you have selected the IPI installation method, or if
+# you want the prepare script to create the VMs or when using the vm_create.sh script to create these. 
+# You can ignore these properties if you manually create the VMs.
+#
+vc_vcenter="10.99.92.13"
+vc_datacenter="Datacenter1"
+vc_datastore="Datastore1"
+vc_cluster="Cluster1"
+vc_res_pool="resourcepool"
+vc_folder="fkocp46"
+vc_guest_id="rhel7_64Guest"
+vc_network="VM Network"
+vm_template="/Datacenter1/vm/Templates/RHCOS_4.6.8"
+
+# Bootstrap VM properties
+vm_bootstrap_mem=16384
+vm_bootstrap_cpu=4
+vm_bootstrap_disk=100
+
+# Master VM properties
+vm_master_mem=32768
+vm_master_cpu=8
+vm_master_disk=200
+
+# Worker VM properties
+vm_worker_mem=65536
+vm_worker_cpu=16
+vm_worker_disk=200
+
+[lb]
+10.75.122.130 host="bastion"
+
+[nfs]
+10.75.122.130 host="bastion"
+
+[bastion]
+10.75.122.130 host="bastion"
+
+[bootstrap]
+10.75.122.177 host="bootstrap" mac="00:e0:ed:6a:d1:4c"
+
+[masters]
+10.75.122.184 host="master-1" mac="00:e0:ed:73:b3:dc"
+10.75.122.167 host="master-2" mac="00:e0:ed:5c:bd:16"
+10.75.122.165 host="master-3" mac="00:e0:ed:73:cb:89"
+
+[workers]
+10.75.122.175 host="worker-1" mac="00:e0:ed:93:a6:ea"
+10.75.122.158 host="worker-2" mac="00:e0:ed:73:be:54"
+10.75.122.142 host="worker-3" mac="00:e0:ed:6a:84:40"
