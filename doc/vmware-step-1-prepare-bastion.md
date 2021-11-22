@@ -90,6 +90,6 @@ wget http://registry.uk.ibm.com:8080/ocp4_downloads/registry/certs/registry.crt 
 ## Prepare infrastructure
 The next steps depend on which type of installation you are going to do and whether or not you have ESX credentials which will allow you to create VMs. If you have the correct permissions, the easiest is to choose an IPI (Installer Provisioned Infrastructure) installation. With the other two installation types (OVA and PXE Boot) you can choose to manually create the virtual machines.
 
-* IPI: OpenShift will create the VMs as part of the installation. Continue with [IPI installation](/doc/vmware-step-2a-prepare-pip.md)
+* IPI: OpenShift will create the VMs as part of the installation. Continue with [IPI installation](/doc/vmware-step-2a-prepare-ipi.md)
 * VMWare template (ova): Create nodes based on an OVA template you upload to vSphere. Continue with [OVA installation](/doc/vmware-step-2b-prepare-ova.md)
 * PXE Boot (pxe): Create empty nodes. When booted, the operating system will be loaded from the bastion node using TFTP. Continue with [PXE Boot installation](/doc/vmware-step-2c-prepare-pxe.md)
