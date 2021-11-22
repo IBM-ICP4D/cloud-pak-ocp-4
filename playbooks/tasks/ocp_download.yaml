@@ -153,10 +153,6 @@
     - "{{ocp_install_dir}}/{{rhcos_rootfs_package}}"
   when: rhcos_installation_method|upper=="PXE" and ansible_selinux.status=='enabled' and openshift_release >= "4.6"
 
-- name: Restore SELinux context for CoreOS files
-  shell: restorecon -Rv "{{ocp_install_dir}}/*"
-  when: rhcos_installation_method|upper!="IPI"
-
 - name: Download CoreOS OVA package "{{rhcos_base_url}}/{{rhcos_ova_package}}"
   get_url:
     url: "{{rhcos_base_url}}/{{rhcos_ova_package}}"
@@ -173,3 +169,7 @@
     ftype: a
     state: present
   when: rhcos_installation_method|upper=="OVA" and ansible_selinux.status=='enabled'
+
+- name: Restore SELinux context for CoreOS and OVA files
+  shell: restorecon -Rv "{{ocp_install_dir}}/*"
+  when: rhcos_installation_method|upper!="IPI"
