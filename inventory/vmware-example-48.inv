@@ -5,7 +5,7 @@ workers
 [all:vars]
 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
 domain_name="coc.ibm.com"
-cluster_name="ocp45"
+cluster_name="ocp48"
 default_gateway="10.99.92.1"
 
 #
@@ -51,7 +51,7 @@ ocp_install_dir="/ocp_install"
 # the packages needed. If you want to install a different release of OpenShift, it is sufficient to change the
 # openshift_release property. The download scripts automatically select the relevant packages from the URL.
 #
-openshift_release="4.5"
+openshift_release="4.8"
 openshift_base_url="https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest-{{openshift_release}}/"
 rhcos_base_url="https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/{{openshift_release}}/latest/"
 openshift_client_package_pattern=".*(openshift-client.*tar.gz).*"
@@ -73,7 +73,7 @@ opt_out_health_checking=False
 # bastion node instead of a public NTP server. If you use the bastion node as the NTP server, 
 # you have to specify which range of servers will be allowed to synchronize
 # themselves with the bastion node; you can do this in the ntp_allow property.
-# Finally, specify a list of external servers withh which the nodes will by synchronized, for example:
+# Finally, specify a list of external servers with which the nodes will by synchronized, for example:
 # ntp_server=['0.rhel.pool.ntp.org', '1.rhel.pool.ntp.org'].
 #
 setup_chrony_server=False
@@ -97,7 +97,7 @@ interface_script="/etc/sysconfig/network-scripts/ifcfg-ens192"
 # it will also serve the RHCOS ISO using the TFTP server.
 #
 dhcp_on_bastion=True
-dhcp_range=['10.99.92.51','10.99.92.70']
+dhcp_range=['10.99.92.51','10.99.92.60']
 
 #
 # Indicate whether the load balancer must be configured by the prepare script. If you choose to use an external load
@@ -182,10 +182,10 @@ vc_datacenter="Datacenter1"
 vc_datastore="Datastore1"
 vc_cluster="Cluster1"
 vc_res_pool="resourcepool"
-vc_folder="/fkocp45"
+vc_folder="fkocp48"
 vc_guest_id="rhel7_64Guest"
 vc_network="VM Network"
-vm_template="/Datacenter1/vm/Templates/RHCOS_4.3.8"
+vm_template="/Datacenter1/vm/Templates/RHCOS_4.8.8"
 
 # Bootstrap VM properties
 vm_bootstrap_mem=16384

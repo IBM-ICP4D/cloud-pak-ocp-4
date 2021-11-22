@@ -69,6 +69,37 @@ Export this repository to a zip file and upload it to the Bastion node. Unzip th
 ## Prepare registry server (in case of disconnected installation)
 If you're doing a disconnected (air-gapped) installation of OpenShift, please ensure you set up a registry server. You can follow the instructions in the Red Hat OpenShift documentation or the steps documented here: [Create air-gapped registry](/doc/ocp-airgapped-create-registry.md)
 
+## Download the OpenShift 4.x pull secret
+A pull secret is needed to download the OpenShift assets from the Red Hat registry. You can download your pull secret from here: https://cloud.redhat.com/openshift/install/vsphere/user-provisioned. Click on **Download pull secret**.
+
+Create file `/tmp/ocp_pullsecret.json` on the node from which you run the `prepare.sh` script.
+
+### Disconnected (air-gapped) installation of OpenShift 4.x
+If you're doing a disconnected installation of OpenShift, please download the pull secret that was created using the steps in [Create air-gapped registry](/doc/ocp-airgapped-create-registry.md), for example:
+```
+wget http://registry.uk.ibm.com:8080/ocp4_downloads/ocp4_install/ocp_pullsecret.json -O /tmp/ocp_pullsecret.json
+```
+
+Also, download the certificate that of the registry server that was created, for example:
+```
+wget http://registry.uk.ibm.com:8080/ocp4_downloads/registry/certs/registry.crt -O /tmp/registry.crt
+```
+
+> If your registry server is not registered in the DNS, you can add an entry to the `/etc/hosts` file on the bastion node. This file is used for input by the DNS server spun up on the bastion node so the registry server IP address can be resolved from all the cluster node.
+
+## Prepare infrastructure
+The next steps depend on which type of installation you are going to do and whether or not you have ESX credentials which will allow you to create VMs. If you have the correct permissions, the easiest is to choose an IPI (Installer Provisioned Infrastructure) installation. With the other two installation types (OVA and PXE Boot) you can choose to manually create the virtual machines.
+
+* IPI: OpenShift will create the VMs as part of the installation. Continue with [IPI installation](/doc/vmware-step-2a-prepare-pip.md)
+* VMWare template (ova): Create nodes based on an OVA template you upload to vSphere. Continue with [OVA installation](/doc/vmware-step-2b-prepare-ova.md)
+* PXE Boot (pxe): Create empty nodes. When booted, the operating system will be loaded from the bastion node using TFTP. Continue with [PXE Boot installation](/doc/vmware-step-2c-prepare-pxe.md)
+
+
+###############
+
+[VMWare - Step 2 - Prepare for OpenShift installation](/doc/vmware-step-2-prepare-openshift-installation.md)
+
+
 ## Create the cluster VMs (if you don't have the vSphere credentials)
 If you have administrator access to the ESX infrastructure, you can select the IPI install or specify that the VMs are automatically created during the preparation steps. If you don't have administrator access, you can have the vSphere administrator create VMs manually, either empty if you're using PXE boot installation or using a VMWare template (OVA).
 
@@ -99,15 +130,6 @@ To install the required Red Hat CoreOS (RHCOS) on the cluster nodes, you have tw
 * VMWare template (ova): Create nodes based on an OVA template that was uploaded to vSphere.
 
 Below you will find the infrastructure preparation steps required for each of the installation methods, along with the most-important inventory settings.
-
-### IPI installation
-This is the most straightforward installation method if your vSphere user can provision new virtual machines. The OpenShift installation process uploads a VM template and clones this into the bootstrap, masters and workers and provisions the clusters. Ensure that you have reviewed and adjusted the following additional settings in the inventory file:
-* DHCP range - Ensure that you have enough free IP addresses for all cluster nodes.
-* VIP addresses - Virtual IP adress for the API (masters) and the ingress (workers).
-* VM settings - vSphere server, data center, data store, resource pool, master and worker specs, number of masters and workers.
-* Nodes section - The sections for bootstrap, masters and workers will be ignored because OpenShift will determine the name of the nodes. However, do not remove the sections, they must exist.
-
-When running the prepare script in the next step, you must specify the vc_user and vc_password parameters. Make sure that you have them handy.
 
 ### PXE boot installation
 This is the preferred option if your vSphere user cannot provision new virtual machines or if you want to determine the names of your nodes or use static IP addresses. You can also use this option if your user _can_ create virtual machines but you want to have cnotrol over the cluster node names and IP addresses. Ensure you have reviewed and adjusted the following settings in the inventory file:
@@ -142,8 +164,6 @@ After making the changes to the inventory file, the bottom section of the invent
 10.99.92.58 host="worker-3" mac="00:50:56:ab:b2:6d"
 ```
 
-### Disconnected (air-gapped) installation of OpenShift 4.x
-In case you're doing a disconnected installation of OpenShift, update the example inventory file `/inventory/inventory/vmware-airgapped-example.inv` to match your cluster.
 
 ## Continue with next step
 Once you've provisioned the VMs, you can proceed with the preparation of the bastion node for the OpenShift installation:
