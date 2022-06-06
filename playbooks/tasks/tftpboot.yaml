@@ -1,13 +1,4 @@
 ---
-
-- name: Find CoreOS metal package
-  find:
-    paths: "{{ocp_install_dir}}"
-    patterns: "{{rhcos_metal_package_pattern}}"
-    use_regex: yes
-  register: found_metal_files
-  when: openshift_release < "4.6"
-
 - name: Find CoreOS kernel
   find:
     paths: "{{ocp_install_dir}}"
@@ -28,20 +19,13 @@
     patterns: "{{rhcos_rootfs_package_pattern}}"
     use_regex: yes
   register: found_rootfs_files
-  when: openshift_release >= "4.6"
 
 - set_fact:
     rhcos_kernel_package: "{{(found_kernel_files.files | last)['path']}}" 
     rhcos_initramfs_package: "{{(found_initramfs_files.files | last)['path']}}" 
 
 - set_fact:
-    rhcos_metal_bios_package: "{{(found_metal_files.files | last)['path']}}" 
-  when: openshift_release < "4.6"
-
-- set_fact:
     rhcos_rootfs_package: "{{(found_rootfs_files.files | last)['path']}}" 
-  when: openshift_release >= "4.6"
-
 
 - name: Create TFTP directory
   file:
@@ -81,6 +65,12 @@
   copy:
     src: "{{rhcos_initramfs_package}}"
     dest: "{{ocp_install_dir}}/tftpboot/images/{{rhcos_initramfs_package | basename}}"
+    remote_src: True
+
+- name: Copy root file system package "{{rhcos_initramfs_package}}" to TFTP
+  copy:
+    src: "{{rhcos_rootfs_package}}"
+    dest: "{{ocp_install_dir}}/tftpboot/images/{{rhcos_rootfs_package | basename}}"
     remote_src: True
 
 - name: Create TFTP configuration directory
@@ -143,7 +133,6 @@
     - "{{groups['masters']}}"
   vars:
     node_type: master
-    metal_bios_file: "{{(found_metal_files.files | last)['path']}}" 
 
 - name: Generate boot menu for workers
   template:
@@ -156,4 +145,3 @@
     - "{{groups['workers']}}"
   vars:
     node_type: worker
-    metal_bios_file: "{{(found_metal_files.files | last)['path']}}" 
