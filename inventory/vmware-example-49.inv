@@ -5,7 +5,7 @@ workers
 [all:vars]
 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
 domain_name="coc.ibm.com"
-cluster_name="ocp46"
+cluster_name="ocp49"
 default_gateway="10.99.92.1"
 
 #
@@ -22,7 +22,7 @@ default_gateway="10.99.92.1"
 # start the bootstrap, masters and workers yourself while the script is waiting for the bootstrap.
 # When rhcos_installation_method=ipi, run_install is assumed to be True as well.
 #
-rhcos_installation_method=ipi
+rhcos_installation_method=pxe
 vm_create_vms=False
 run_install=True
 
@@ -51,7 +51,7 @@ ocp_install_dir="/ocp_install"
 # the packages needed. If you want to install a different release of OpenShift, it is sufficient to change the
 # openshift_release property. The download scripts automatically select the relevant packages from the URL.
 #
-openshift_release="4.6"
+openshift_release="4.9"
 openshift_base_url="https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest-{{openshift_release}}/"
 rhcos_base_url="https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/{{openshift_release}}/latest/"
 openshift_client_package_pattern=".*(openshift-client.*tar.gz).*"
@@ -97,7 +97,7 @@ interface_script="/etc/sysconfig/network-scripts/ifcfg-ens192"
 # it will also serve the RHCOS ISO using the TFTP server.
 #
 dhcp_on_bastion=True
-dhcp_range=['10.99.92.53','10.99.92.70']
+dhcp_range=['10.99.92.51','10.99.92.60']
 
 #
 # Indicate whether the load balancer must be configured by the prepare script. If you choose to use an external load
@@ -173,16 +173,24 @@ vm_number_of_masters=3
 vm_number_of_workers=3
 
 #
-# VMware envrionment specific properties. These are required for the IPI installation method.
+# VMware envrionment specific properties. These are only used if you have selected the IPI installation method, or if
+# you want the prepare script to create the VMs or when using the vm_create.sh script to create these. 
+# You can ignore these properties if you manually create the VMs.
 #
 vc_vcenter="10.99.92.13"
 vc_datacenter="Datacenter1"
 vc_datastore="Datastore1"
 vc_cluster="Cluster1"
 vc_res_pool="resourcepool"
-vc_folder="fkocp46"
+vc_folder="fkocp48"
+vc_guest_id="rhel7_64Guest"
 vc_network="VM Network"
-vm_template="/Datacenter1/vm/Templates/RHCOS_4.6.8"
+vm_template="/Datacenter1/vm/Templates/RHCOS_4.9.3"
+
+# Bootstrap VM properties
+vm_bootstrap_mem=16384
+vm_bootstrap_cpu=4
+vm_bootstrap_disk=100
 
 # Master VM properties
 vm_master_mem=32768
@@ -204,10 +212,14 @@ vm_worker_disk=200
 10.99.92.50 host="bastion"
 
 [bootstrap]
-# Ignored for IPI installations
+10.99.92.51 host="bootstrap" mac="xx:xx:xx:xx:xx:xx"
 
 [masters]
-# Ignored for IPI installations
+10.99.92.52 host="master-1" mac="xx:xx:xx:xx:xx:xx"
+10.99.92.53 host="master-2" mac="xx:xx:xx:xx:xx:xx"
+10.99.92.54 host="master-3" mac="xx:xx:xx:xx:xx:xx"
 
 [workers]
-# Ignored for IPI installations
+10.99.92.55 host="worker-1" mac="xx:xx:xx:xx:xx:xx"
+10.99.92.56 host="worker-2" mac="xx:xx:xx:xx:xx:xx"
+10.99.92.57 host="worker-3" mac="xx:xx:xx:xx:xx:xx"
