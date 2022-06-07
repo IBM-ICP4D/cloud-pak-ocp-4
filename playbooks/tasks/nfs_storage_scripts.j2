@@ -4,16 +4,7 @@
 echo "Creating NFS storage class"
 export KUBECONFIG={{ocp_install_dir}}/auth/kubeconfig
 
-echo "Check if NFS storage class already exists"
-oc get sc nfs-client > /dev/null 2>&1
-
-
-if [ $? -ne 0 ];then
-    echo "Create nfs-client storage class"
-    oc -n default create -f {{ocp_install_dir}}/nfs-client/nfs-storage-class.yaml
-    oc adm policy add-scc-to-user anyuid -z nfs-client-provisioner
-    oc adm policy add-scc-to-user hostmount-anyuid -z nfs-client-provisioner
-    oc -n default create -f {{ocp_install_dir}}/nfs-client/nfs-storage-class-cluster-role.yaml
-else
-    echo "Storage class nfs-client already exists, no changes made"
-fi
+oc -n default create -f {{ocp_install_dir}}/nfs-client/nfs-storage-class.yaml
+oc adm policy add-scc-to-user anyuid -z nfs-client-provisioner
+oc adm policy add-scc-to-user hostmount-anyuid -z nfs-client-provisioner
+oc -n default create -f {{ocp_install_dir}}/nfs-client/nfs-storage-class-cluster-role.yaml

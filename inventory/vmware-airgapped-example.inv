@@ -134,7 +134,7 @@ set_bastion_hostname=False
 #
 # If manage_nfs is True, the Ansible script will try to format and mount the NFS volume configured in the nfs_volume*
 # properties on the server indicated in the [nfs] section. If the value is False, the nfs server referred to in the [nfs]
-# section will still be used to configure the nfs-client storage class if specified. However in that case, it is assumed
+# section will still be used to configure the managed-nfs-storage storage class if specified. However in that case, it is assumed
 # that an external NFS server is available which is not configured by the Ansible playbooks.
 #
 # Volume parameters: these parameters indicate which volume the preparation scripts have to
@@ -152,7 +152,7 @@ nfs_volume_mount_path="/nfs"
 # Storageclass parameters: indicate whether NFS and/or Portworx storage classes must be created
 #
 
-# Create nfs-client storage class?
+# Create managed-nfs-storage storage class?
 create_nfs_sc=True
 
 # Install Portworx and create storage classes?
@@ -160,9 +160,9 @@ create_portworx_sc=False
 
 #
 # Registry storage class and size to be used when image registry is configured. If NFS is used for
-# the image registry, the storage class is typically nfs-client. For OCS, it would be ocs-storagecluster-cephfs.
+# the image registry, the storage class is typically managed-nfs-storage. For OCS, it would be ocs-storagecluster-cephfs.
 #
-image_registry_storage_class=nfs-client
+image_registry_storage_class=managed-nfs-storage
 image_registry_size=200Gi
 
 # This variable configures the subnet in which services will be created in the OpenShift Container Platform SDN.
