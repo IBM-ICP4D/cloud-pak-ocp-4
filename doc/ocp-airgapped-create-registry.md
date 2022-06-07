@@ -105,8 +105,8 @@ podman save -o /ocp4_downloads/registry/images/registry-2.tar docker.io/library/
 
 ## Download NFS provisioner image
 ```
-podman pull quay.io/external_storage/nfs-client-provisioner:latest
-podman save -o /ocp4_downloads/registry/images/nfs-client-provisioner.tar quay.io/external_storage/nfs-client-provisioner:latest
+podman pull gcr.io/k8s-staging-sig-storage/nfs-subdir-external-provisioner:v4.0.2
+podman save -o /ocp4_downloads/registry/images/nfs-client-provisioner.tar gcr.io/k8s-staging-sig-storage/nfs-subdir-external-provisioner:v4.0.2
 ```
 
 ## Create registry pod

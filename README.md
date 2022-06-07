@@ -19,15 +19,13 @@ When deploying on VMWare infrastructure, you can either create the VMs that make
 
 ![VMWare - OCP installation process](/images/ocp-installation-process-vmware.png)
 
-## Step 1 - Provision Bastion node and (optionally) cluster nodes
+## Step 1 - Prepare Bastion node and (optionally) cluster nodes
 Before you can install OpenShift, you need a bastion node from which the installation will be run. Dependent on the chosen installation type, you can also provision the cluster nodes.
 
-[Step 1 - Establish infrastructure](/doc/vmware-step-1-prepare-Infrastructure.md)
+[Step 1 - Prepare bastion and infrastructure](/doc/vmware-step-1-prepare-bastion.md)
 
 ## Step 2  - Prepare for OpenShift installation
-The document below guides you through preparation of the bastion node and installing OpenShift. Choose the appropriate document for the infrastructure you have chosen to install on. In the below steps you will prepare the bastion node of the cluster and instantiate the required services such as DNS, NFS, NTP, to start the installation of OpenShift.
-
-[Step 2 - Prepare and install OpenShift](/doc/vmware-step-2-prepare-openshift-installation.md)
+This steps is dependent on the type of installation you will be performing. Click the appropriate link from the Step 1 document to find the steps associated with the chosen installation type.
 
 ## Step 3 - Install OpenShift (manual)
 Once the bastion node has been prepared, continue with the installation of OpenShift.
