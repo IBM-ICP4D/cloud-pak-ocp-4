@@ -27,6 +27,8 @@ Before you can install OpenShift, you need a bastion node from which the install
 ## Step 2  - Prepare for OpenShift installation
 This steps is dependent on the type of installation you will be performing. Click the appropriate link from the Step 1 document to find the steps associated with the chosen installation type.
 
+[Step 2 - Prepare for OpenShift installation](/doc/vmware-step-2-prepare-openshift-installation.md)
+
 ## Step 3 - Install OpenShift (manual)
 Once the bastion node has been prepared, continue with the installation of OpenShift.
 
