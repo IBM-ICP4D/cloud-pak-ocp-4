@@ -5,8 +5,8 @@ In this document we cover the steps for provisioning of demo/POC infrastructure 
 
 ## Provision bastion node (and potentially an NFS node)
 Make sure that the following infrastructure is available or can be created:
-* 1 RHEL 8.1+ or 7.7+ Bastion node, 8 processing cores and 16 GB of memory
-* 1 optional RHEL 8.1+ or 7.7+ NFS server, 8 processing cores and 32 GB of memory, if you want to use NFS and don't have an NFS server available already. If you don't want to provision a separate server for NFS storage, you can also use the bastion node for this. In that case make sure you configure the bastion node with 8 processing cores and 32 GB of memory.
+* 1 RHEL 8.x, 8 processing cores and 16 GB of memory
+* 1 optional RHEL 8.x NFS server, 8 processing cores and 32 GB of memory, if you want to use NFS and don't have an NFS server available already. If you don't want to provision a separate server for NFS storage, you can also use the bastion node for this. In that case make sure you configure the bastion node with 8 processing cores and 32 GB of memory.
 
 ## Log on to the Bastion node
 Log on to the bastion node as `root`.
@@ -29,11 +29,6 @@ If you don't have this repository configured yet, you can do as as follows for R
 yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
 ```
 
-For RHEL-7, do the following:
-```
-yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-```
-
 ## Install packages on the bastion node
 On the bastion, install the packages which are needed for the preparation, for RHEL-8:
 ```
@@ -43,12 +38,31 @@ yum install -y ansible bind-utils buildah chrony dnsmasq git \
     screen sos syslinux-tftpboot wget yum-utils
 ```
 
-For RHEL-7, do the following:
+Additionally, install some additional Python modules:
 ```
-yum install -y ansible bind-utils buildah chrony dnsmasq git \
-    haproxy httpd-tools jq libvirt net-tools nfs-utils nginx podman \
-    policycoreutils-python python3 python-netaddr python-passlib python-pip python-pyvmomi python-requests \
-    screen sos syslinux-tftpboot wget yum-utils
+pip3 install passlib
+```
+
+> **Note** If your server has more than 1 Python version, Ansible typically chooses the newest version. If `pip3` references a different version of Python than the one used by Ansible, you may have to find the latest version and run the `pip install` against that version.
+
+Example:
+```
+ls -al /usr/bin/pip*
+```
+
+Output:
+```
+lrwxrwxrwx. 1 root root  23 Sep  5 09:42 /usr/bin/pip-3 -> /etc/alternatives/pip-3
+lrwxrwxrwx. 1 root root  22 Sep  5 09:42 /usr/bin/pip3 -> /etc/alternatives/pip3
+lrwxrwxrwx. 1 root root   8 Oct 14  2021 /usr/bin/pip-3.6 -> ./pip3.6
+-rwxr-xr-x. 1 root root 209 Oct 14  2021 /usr/bin/pip3.6
+lrwxrwxrwx. 1 root root   8 Oct 18  2021 /usr/bin/pip-3.8 -> ./pip3.8
+-rwxr-xr-x. 1 root root 536 Oct 18  2021 /usr/bin/pip3.8
+```
+
+Now install using `pip3.8`:
+```
+pip3.8 install passlib
 ```
 
 If you have a separate storage server, please install the following packages on that VM (works for both RHEL-8 and RHEL-7):
