@@ -69,14 +69,17 @@
     - "{{ocp_install_dir}}/master.ign"
     - "{{ocp_install_dir}}/worker.ign"
 
-- name: Allow nginx to read ignition files (SELinux)
-  sefcontext:
-    target: '{{ ocp_install_dir }}/.*\.ign'
-    setype: httpd_sys_content_t
-    seuser: system_u
-    ftype: a
-    state: present
-  when: ansible_selinux.status=='enabled' 
+- block:
+  - name: Check if SELinux has already been configured for ignition files
+    shell:
+      semanage fcontext | grep httpd_sys_content_t | grep '{{ ocp_install_dir }}/.*\.ign' | wc -l
+    register: _http_ignition
+
+  - name: Enable access to ignition files for nginx (SELinux)
+    shell: |
+      semanage sefcontext -a -t httpd_sys_content_t -s system_u '{{ ocp_install_dir }}/.*\.ign'
+    when: _http_ignition.stdout == "0"
+  when: ansible_selinux.status=='enabled'
 
 - name: Restore SELinux context for ignition files
   shell: restorecon -Rv "{{ocp_install_dir}}/*.ign"
@@ -98,13 +101,16 @@
     - "{{ocp_install_dir}}/worker.ign"
   when: rhcos_installation_method|upper=="OVA"
 
-- name: Allow nginx to read base64 ignition files (SELinux)
-  sefcontext:
-    target: '{{ ocp_install_dir }}/.*\.ign\.64'
-    setype: httpd_sys_content_t
-    seuser: system_u
-    ftype: a
-    state: present
+- block:
+  - name: Check if SELinux has already been configured for base64 ignition files
+    shell:
+      semanage fcontext | grep httpd_sys_content_t | grep '{{ ocp_install_dir }}/.*\.ign\.64' | wc -l
+    register: _http_ignition_64
+
+  - name: Enable access to base64 ignition files for nginx (SELinux)
+    shell: |
+      semanage sefcontext -a -t httpd_sys_content_t -s system_u '{{ ocp_install_dir }}/.*\.ign\.64'
+    when: _http_ignition_64.stdout == "0"
   when: 
   - ansible_selinux.status=='enabled'
   - rhcos_installation_method|upper=="OVA"
