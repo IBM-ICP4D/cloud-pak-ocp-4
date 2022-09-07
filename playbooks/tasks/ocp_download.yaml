@@ -104,18 +104,37 @@
   retries: 3
   when: rhcos_installation_method=="pxe"
 
-- name: Allow nginx to access CoreOS kernel, initramfs and rootfs files (SELinux)
-  sefcontext:
-    target: '{{item}}'
-    setype: httpd_sys_content_t
-    seuser: system_u
-    ftype: a
-    state: present
-  with_items:
-    - "{{ocp_install_dir}}/{{rhcos_kernel_package}}"
-    - "{{ocp_install_dir}}/{{rhcos_initramfs_package}}"
-    - "{{ocp_install_dir}}/{{rhcos_rootfs_package}}"
-  when: rhcos_installation_method=="pxe" and ansible_selinux.status=='enabled'
+- block:
+  - name: Check if SELinux has already been configured for CoreOS Kernel package
+    shell:
+      semanage fcontext | grep httpd_sys_content_t | grep '{{ocp_install_dir}}/{{rhcos_kernel_package}}' | wc -l
+    register: _selinux_rhcos
+  - name: Enable access to CoreOS Kernel package
+    shell: |
+      semanage sefcontext -a -t httpd_sys_content_t -s system_u '{{ocp_install_dir}}/{{rhcos_kernel_package}}'
+    when: _selinux_rhcos.stdout == "0"
+
+  - name: Check if SELinux has already been configured for CoreOS initramfs package
+    shell:
+      semanage fcontext | grep httpd_sys_content_t | grep '{{ocp_install_dir}}/{{rhcos_initramfs_package}}' | wc -l
+    register: _selinux_rhcos
+  - name: Enable access to CoreOS initramfs package
+    shell: |
+      semanage sefcontext -a -t httpd_sys_content_t -s system_u '{{ocp_install_dir}}/{{rhcos_initramfs_package}}'
+    when: _selinux_rhcos.stdout == "0"
+
+  - name: Check if SELinux has already been configured for CoreOS rootfs package
+    shell:
+      semanage fcontext | grep httpd_sys_content_t | grep '{{ocp_install_dir}}/{{rhcos_rootfs_package}}' | wc -l
+    register: _selinux_rhcos
+  - name: Enable access to CoreOS rootfs package
+    shell: |
+      semanage sefcontext -a -t httpd_sys_content_t -s system_u '{{ocp_install_dir}}/{{rhcos_rootfs_package}}'
+    when: _selinux_rhcos.stdout == "0"
+
+  when:
+  - rhcos_installation_method=="pxe"
+  - ansible_selinux.status=='enabled'
 
 - name: Restore SELinux context for CoreOS files
   shell: restorecon -Rv "{{ocp_install_dir}}/*"
