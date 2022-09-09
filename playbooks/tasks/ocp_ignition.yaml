@@ -77,7 +77,7 @@
 
   - name: Enable access to ignition files for nginx (SELinux)
     shell: |
-      semanage sefcontext -a -t httpd_sys_content_t -s system_u '{{ ocp_install_dir }}/.*\.ign'
+      semanage fcontext -a -t httpd_sys_content_t -s system_u '{{ ocp_install_dir }}/.*\.ign'
     when: _http_ignition.stdout == "0"
   when: ansible_selinux.status=='enabled'
 
@@ -109,7 +109,7 @@
 
   - name: Enable access to base64 ignition files for nginx (SELinux)
     shell: |
-      semanage sefcontext -a -t httpd_sys_content_t -s system_u '{{ ocp_install_dir }}/.*\.ign\.64'
+      semanage fcontext -a -t httpd_sys_content_t -s system_u '{{ ocp_install_dir }}/.*\.ign\.64'
     when: _http_ignition_64.stdout == "0"
   when: 
   - ansible_selinux.status=='enabled'

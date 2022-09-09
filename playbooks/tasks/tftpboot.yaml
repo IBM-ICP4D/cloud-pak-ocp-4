@@ -43,7 +43,7 @@
 
   - name: Enable access to TFTP files (SELinux)
     shell: |
-      semanage sefcontext -a -t httpd_sys_content_t -s system_u '{{ocp_install_dir}}/tftpboot(/.*)?'
+      semanage fcontext -a -t httpd_sys_content_t -s system_u '{{ocp_install_dir}}/tftpboot(/.*)?'
     when: _tftp_selinux.stdout == "0"
   when: 
   - ansible_selinux.status=='enabled'
