@@ -7,6 +7,7 @@ ansible_ssh_common_args='-o StrictHostKeyChecking=no'
 domain_name="coc.ibm.com"
 cluster_name="ocp48"
 default_gateway="10.99.92.1"
+interface_name="ens192"
 
 #
 # Indicate the method by which Red Hat CoreOS will be installed. This can be one of the following values:

@@ -6,4 +6,4 @@ label linux
   menu label ^Install RHEL CoreOS
   menu default
   kernel /images/{{rhcos_kernel_package | basename}}
-  append initrd=/images/{{rhcos_initramfs_package | basename}} coreos.live.rootfs_url=http://{{groups['bastion'][0]}}:{{http_server_port}}/{{rhcos_rootfs_package}} rd.neednet=1 coreos.inst.install_dev=/dev/sda coreos.inst.ignition_url=http://{{groups['bastion'][0]}}:{{http_server_port}}/{{ocp_install_dir}}/{{node_type}}.ign ip={{item}}::{{default_gateway}}:255.255.255.0:{{hostvars[item]['host']}}.{{cluster_name}}.{{domain_name}}:ens192:none nameserver={{groups['bastion'][0]}} 
+  append initrd=/images/{{rhcos_initramfs_package | basename}} coreos.live.rootfs_url=http://{{groups['bastion'][0]}}:{{http_server_port}}/{{rhcos_rootfs_package}} rd.neednet=1 coreos.inst.install_dev=/dev/sda coreos.inst.ignition_url=http://{{groups['bastion'][0]}}:{{http_server_port}}/{{ocp_install_dir}}/{{node_type}}.ign ip={{item}}::{{default_gateway}}:255.255.255.0:{{hostvars[item]['host']}}.{{cluster_name}}.{{domain_name}}:{{interface_name}}:none nameserver={{groups['bastion'][0]}} 
