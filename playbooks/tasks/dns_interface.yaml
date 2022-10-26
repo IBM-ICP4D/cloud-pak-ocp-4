@@ -5,6 +5,10 @@
     path: "{{interface_script}}"
   register: stat_result
 
+- fail:
+    msg: "the network interface file {{interface_script}} not exist. Without it, the DNS config would not be correct."
+  when: not stat_result.stat.exists
+
 - name: Change DNS service in interface script
   lineinfile:
     path: "{{interface_script}}"
@@ -12,6 +16,24 @@
     line: "DNS1={{groups['bastion'][0]}}"
   when: stat_result.stat.exists==True
   register: interface_changed
+
+- name: Check if interface boots from DHCP
+  shell: cat "{{interface_script}}"
+  when: stat_result.stat.exists
+  register: interface_boot_from_dhcp_stat_result
+
+- name: Check if dhclient config exists
+  stat:
+    path: "/etc/dhcp/dhclient.conf"
+  register: dhclient_conf_stat_result
+
+- name: Prepend local DNS server to dhclient if booting from DHCP
+  lineinfile:
+    path: "/etc/dhcp/dhclient.conf"
+    regexp: "^prepend*{{groups['bastion'][0]}}"
+    line: "prepend domain-name-servers {{groups['bastion'][0]}} ;"
+  when: dhclient_conf_stat_result.stat.exists==True and interface_boot_from_dhcp_stat_result.stdout.find('BOOTPROTO=dhcp') != -1
+  register: interface_dhclient_changed
 
 - name: Restart NetworkManager service
   service:
