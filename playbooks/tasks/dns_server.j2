@@ -1,7 +1,9 @@
 # {{ ansible_managed }}
 
 no-resolv
-server={{external_name_servers[0]}}
+{% for upstream_dns in external_name_servers %}
+server={{upstream_dns}}
+{% endfor %}
 local=/{{cluster_name}}.{{domain_name}}/
 
 address=/api-int.{{cluster_name}}.{{domain_name}}/{{groups['lb'][0]}}
