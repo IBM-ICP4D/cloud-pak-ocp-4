@@ -9,12 +9,12 @@ address=/api.{{cluster_name}}.{{domain_name}}/{{groups['lb'][0]}}
 address=/.apps.{{cluster_name}}.{{domain_name}}/{{groups['lb'][0]}}
 
 {% if rhcos_installation_method|upper != "IPI" %}
-address=/etcd-0.{{cluster_name}}.{{domain_name}}/{{groups['masters'][0]}}
-address=/etcd-1.{{cluster_name}}.{{domain_name}}/{{groups['masters'][1]}}
-address=/etcd-2.{{cluster_name}}.{{domain_name}}/{{groups['masters'][2]}}
-srv-host=_etcd-server-ssl._tcp.{{cluster_name}}.{{domain_name}},etcd-0.{{cluster_name}}.{{domain_name}},2380,0,10
-srv-host=_etcd-server-ssl._tcp.{{cluster_name}}.{{domain_name}},etcd-1.{{cluster_name}}.{{domain_name}},2380,0,10
-srv-host=_etcd-server-ssl._tcp.{{cluster_name}}.{{domain_name}},etcd-2.{{cluster_name}}.{{domain_name}},2380,0,10
+{% for master in groups['masters'] %}
+address=/etcd-{{loop.index - 1}}.{{cluster_name}}.{{domain_name}}/{{master}}
+{% endfor %}
+{% for master in groups['masters'] %}
+srv-host=_etcd-server-ssl._tcp.{{cluster_name}}.{{domain_name}},etcd-{{loop.index - 1}}.{{cluster_name}}.{{domain_name}},2380,0,10
+{% endfor %}
 {% endif %}
 
 {% if dhcp_on_bastion %}
