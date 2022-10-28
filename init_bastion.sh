@@ -13,15 +13,13 @@ begin_banner "Top level" "project env prepare"
 
     case ${THE_DISTRIBUTION_ID} in
       debian)
-        [[ -e /proc/sys/kernel/unprivileged_userns_clone ]] && sudo sysctl kernel.unprivileged_userns_clone=1
-        curl -L https://nixos.org/nix/install | sh
+        my_exit "debian not supported yet." 222
 	     ;;
       ubuntu)
-        [[ -e /proc/sys/kernel/unprivileged_userns_clone ]] && sudo sysctl kernel.unprivileged_userns_clone=1
-        curl -L https://nixos.org/nix/install | sh
+        my_exit "ubuntu not supported yet." 222
 	     ;;
       Darwin)
-        curl -L https://nixos.org/nix/install | sh
+        my_exit "macOS not supported yet." 222
 	     ;;
       rhel|centos)
         if [ "X$THE_DISTRIBUTION_VERSION" != "X8" ]; then
