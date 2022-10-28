@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+
+if ! type dirname > /dev/null 2>&1; then
+    echo "Not even a linux or macOS, Windoze? We don't support it. Abort."
+    exit 1
+fi
+
+. "$(dirname "$0")"/common.sh
+
+init_with_root_or_sudo "$0"
+
+begin_banner "Top level" "project env prepare"
+
+    case ${THE_DISTRIBUTION_ID} in
+      debian)
+        [[ -e /proc/sys/kernel/unprivileged_userns_clone ]] && sudo sysctl kernel.unprivileged_userns_clone=1
+        curl -L https://nixos.org/nix/install | sh
+	     ;;
+      ubuntu)
+        [[ -e /proc/sys/kernel/unprivileged_userns_clone ]] && sudo sysctl kernel.unprivileged_userns_clone=1
+        curl -L https://nixos.org/nix/install | sh
+	     ;;
+      Darwin)
+        curl -L https://nixos.org/nix/install | sh
+	     ;;
+      rhel|centos)
+        if [ "X$THE_DISTRIBUTION_VERSION" != "X8" ]; then
+          my_exit "only support centos/RHEL 8.x" 126
+        fi
+
+        systemctl stop firewalld;systemctl disable firewalld
+        yum -y update
+        yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+        yum install -y ansible bind-utils buildah chrony dnsmasq git \
+                       haproxy httpd-tools jq libvirt net-tools nfs-utils nginx podman \
+                       python3 python3-netaddr python3-passlib python3-pip python3-policycoreutils python3-pyvmomi python3-requests \
+                       screen sos syslinux-tftpboot wget yum-utils
+
+        LATEST_PIP=$(ls -a /usr/bin/pip*|sort|tail -1)
+        "$LATEST_PIP" install passlib
+
+	     ;;
+      *) ;;
+    esac
+
+done_banner "Top level" "project env prepare"
+
