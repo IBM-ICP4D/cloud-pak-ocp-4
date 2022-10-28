@@ -2,23 +2,23 @@
 
 - name: Check if interface script exists
   stat:
-    path: "{{interface_script}}"
+    path: "{{bastion_interface_script}}"
   register: stat_result
 
 - fail:
-    msg: "the network interface file {{interface_script}} not exist. Without it, the DNS config would not be correct."
+    msg: "the network interface file {{bastion_interface_script}} not exist. Without it, the DNS config would not be correct."
   when: not stat_result.stat.exists
 
 - name: Change DNS service in interface script
   lineinfile:
-    path: "{{interface_script}}"
+    path: "{{bastion_interface_script}}"
     regexp: '^DNS1'
     line: "DNS1={{groups['bastion'][0]}}"
   when: stat_result.stat.exists==True
   register: interface_changed
 
 - name: Check if interface boots from DHCP
-  shell: cat "{{interface_script}}"
+  shell: cat "{{bastion_interface_script}}"
   when: stat_result.stat.exists
   register: interface_boot_from_dhcp_stat_result
 

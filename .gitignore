@@ -1,2 +1,5 @@
 .DS_Store
 scrap
+
+# for sed inplace edit backup
+*.bak

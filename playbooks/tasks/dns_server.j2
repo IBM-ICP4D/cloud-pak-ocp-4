@@ -21,8 +21,11 @@ srv-host=_etcd-server-ssl._tcp.{{cluster_name}}.{{domain_name}},etcd-{{loop.inde
 
 {% if dhcp_on_bastion %}
 domain={{cluster_name}}.{{domain_name}}
-dhcp-range={{dhcp_range[0]}},{{dhcp_range[1]}},infinite
-dhcp-option=3,{{default_gateway}}
+
+{% for tag in groups['dhcp'] | sort %}
+dhcp-range={{tag}},{{hostvars[tag]['begin']}},{{hostvars[tag]['end']}},infinite
+dhcp-option={{tag}},3,{{hostvars[tag]['gateway']}}
+{% endfor %}
 
 {% if rhcos_installation_method|upper!="IPI" %}
 {% for host in groups['masters'] | sort %}
