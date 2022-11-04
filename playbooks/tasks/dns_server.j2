@@ -23,21 +23,21 @@ srv-host=_etcd-server-ssl._tcp.{{cluster_name}}.{{domain_name}},etcd-{{loop.inde
 domain={{cluster_name}}.{{domain_name}}
 
 {% for tag in groups['dhcp'] | sort %}
-dhcp-range={{tag}},{{hostvars[tag]['begin']}},{{hostvars[tag]['end']}},infinite
-dhcp-option={{tag}},3,{{hostvars[tag]['gateway']}}
+dhcp-range=set:{{tag}},{{hostvars[tag]['begin']}},{{hostvars[tag]['end']}},infinite
+dhcp-option=tag:{{tag}},3,{{hostvars[tag]['gateway']}}
 {% endfor %}
 
 {% if rhcos_installation_method|upper!="IPI" %}
 {% for host in groups['masters'] | sort %}
-dhcp-host={{hostvars[host]['mac']}},{{hostvars[host]['host']}},{{host}}
+dhcp-host={{hostvars[host]['mac']}},{{hostvars[host]['host']}},{{host}},set:{{hostvars[host]['dhcp_sub_net']}}
 {% endfor %}
 
 {% for host in groups['workers'] | sort %}
-dhcp-host={{hostvars[host]['mac']}},{{hostvars[host]['host']}},{{host}}
+dhcp-host={{hostvars[host]['mac']}},{{hostvars[host]['host']}},{{host}},set:{{hostvars[host]['dhcp_sub_net']}}
 {% endfor %}
 
 {% for host in groups['bootstrap'] | sort %}
-dhcp-host={{hostvars[host]['mac']}},{{hostvars[host]['host']}},{{host}}
+dhcp-host={{hostvars[host]['mac']}},{{hostvars[host]['host']}},{{host}},set:{{hostvars[host]['dhcp_sub_net']}}
 {% endfor %}
 {% endif %}
 

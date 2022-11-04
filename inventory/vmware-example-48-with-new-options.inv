@@ -224,15 +224,15 @@ sub2 begin="10.11.60.51" end="10.11.60.60" gateway="10.11.60.1"
 10.11.80.187 host="bastion"
 
 [bootstrap]
-10.11.80.51 host="bootstrap" mac="00:50:56:ab:33:90" gateway="10.11.80.1"
+10.11.80.51 host="bootstrap" mac="00:50:56:ab:33:90" gateway="10.11.80.1" dhcp_sub_net="sub1"
 
 [masters]
-10.11.80.52 host="master-1" mac="00:50:56:ab:33:91" gateway="10.11.80.1"
-10.11.80.53 host="master-2" mac="00:50:56:ab:33:92" gateway="10.11.80.1"
-10.11.80.54 host="master-3" mac="00:50:56:ab:33:93" gateway="10.11.80.1"
+10.11.80.52 host="master-1" mac="00:50:56:ab:33:91" gateway="10.11.80.1" dhcp_sub_net="sub1"
+10.11.80.53 host="master-2" mac="00:50:56:ab:33:92" gateway="10.11.80.1" dhcp_sub_net="sub1"
+10.11.80.54 host="master-3" mac="00:50:56:ab:33:93" gateway="10.11.80.1" dhcp_sub_net="sub1"
 
 [workers]
-10.11.80.55 host="worker-1" mac="00:50:56:ab:33:94" gateway="10.11.80.1"
-10.11.80.56 host="worker-2" mac="00:50:56:ab:33:95" gateway="10.11.80.1"
-10.11.80.57 host="worker-3" mac="00:50:56:ab:33:96" gateway="10.11.80.1"
+10.11.80.55 host="worker-1" mac="00:50:56:ab:33:94" gateway="10.11.80.1" dhcp_sub_net="sub1"
+10.11.80.56 host="worker-2" mac="00:50:56:ab:33:95" gateway="10.11.80.1" dhcp_sub_net="sub1"
+10.11.80.57 host="worker-3" mac="00:50:56:ab:33:96" gateway="10.11.80.1" dhcp_sub_net="sub1"
 
