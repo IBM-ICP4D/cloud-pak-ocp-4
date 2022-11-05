@@ -9,7 +9,7 @@ fi
 
 init_with_root_or_sudo "$0"
 
-begin_banner "Top level" "project env prepare"
+begin_banner "Top level" "create an OCP mirror registry"
 
     case ${THE_DISTRIBUTION_ID} in
       debian)
@@ -76,13 +76,13 @@ begin_banner "Top level" "project env prepare"
 	# download coreos
 	# folowwing is for PXE boot
 	#wget -c https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.8/latest/rhcos-${RHCOS_RELEASE}-x86_64-metal.x86_64.raw.gz -O ${MIRROR_DIR}/dependencies/rhcos-${RHCOS_RELEASE}-x86_64-metal.x86_64.raw.gz
-	wget -c https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.8/latest/rhcos-${RHCOS_RELEASE}-x86_64-live-kernel-x86_64 -O ${MIRROR_DIR}/dependencies/hcos-${RHCOS_RELEASE}-x86_64-live-kernel-x86_64
-	wget -c https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.8/latest/rhcos-${RHCOS_RELEASE}-x86_64-live-initramfs.x86_64.img -O ${MIRROR_DIR}/dependencies/hcos-${RHCOS_RELEASE}-x86_64-live-initramfs.x86_64.img
-	wget -c https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.8/latest/rhcos-${RHCOS_RELEASE}-x86_64-live-rootfs.x86_64.img -O ${MIRROR_DIR}/dependencies/hcos-${RHCOS_RELEASE}-x86_64-live-rootfs.x86_64.img
-	#wget -c https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.8/latest/rhcos-${RHCOS_RELEASE}-x86_64-live.x86_64.iso -O ${MIRROR_DIR}/dependencies/hcos-${RHCOS_RELEASE}-x86_64-live.x86_64.iso
+	wget -c https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.8/latest/rhcos-${RHCOS_RELEASE}-x86_64-live-kernel-x86_64 -O ${MIRROR_DIR}/dependencies/rhcos-${RHCOS_RELEASE}-x86_64-live-kernel-x86_64
+	wget -c https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.8/latest/rhcos-${RHCOS_RELEASE}-x86_64-live-initramfs.x86_64.img -O ${MIRROR_DIR}/dependencies/rhcos-${RHCOS_RELEASE}-x86_64-live-initramfs.x86_64.img
+	wget -c https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.8/latest/rhcos-${RHCOS_RELEASE}-x86_64-live-rootfs.x86_64.img -O ${MIRROR_DIR}/dependencies/rhcos-${RHCOS_RELEASE}-x86_64-live-rootfs.x86_64.img
+	#wget -c https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.8/latest/rhcos-${RHCOS_RELEASE}-x86_64-live.x86_64.iso -O ${MIRROR_DIR}/dependencies/rhcos-${RHCOS_RELEASE}-x86_64-live.x86_64.iso
 
 	# following is for OVA install
-	#wget -c https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.8/latest/rhcos-${RHCOS_RELEASE}-x86_64-vmware.x86_64.ova -O ${MIRROR_DIR}/dependencies/hcos-${RHCOS_RELEASE}-x86_64-vmware.x86_64.ova
+	#wget -c https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.8/latest/rhcos-${RHCOS_RELEASE}-x86_64-vmware.x86_64.ova -O ${MIRROR_DIR}/dependencies/rhcos-${RHCOS_RELEASE}-x86_64-vmware.x86_64.ova
 
 	# extract and install oc into /usr/local/bin
 	tar xvzf ${MIRROR_DIR}/clients/openshift-client-linux.tar.gz -C /usr/local/bin
@@ -157,5 +157,5 @@ begin_banner "Top level" "project env prepare"
       *) ;;
     esac
 
-done_banner "Top level" "project env prepare"
+done_banner "Top level" "create an OCP mirror registry"
 
