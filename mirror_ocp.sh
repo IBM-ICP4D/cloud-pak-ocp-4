@@ -32,7 +32,7 @@ begin_banner "Top level" "create an OCP mirror registry"
 	#fi
 
 	if [ ! -e "${pull_secret_file-/tmp/ocp_pullsecret.json}" ];then
-  		echo "Pull secret file $pull_secret_file does not exist, please create the file or set the pull_secret_file environment variable to point to the file that holds the pull secret."
+  		echo "Pull secret file ${pull_secret_file-/tmp/ocp_pullsecret.json} does not exist, please create the file or set the pull_secret_file environment variable to point to the file that holds the pull secret."
   		exit 1
 	fi
 
