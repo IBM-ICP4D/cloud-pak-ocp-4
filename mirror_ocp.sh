@@ -58,7 +58,7 @@ begin_banner "Top level" "create an OCP mirror registry"
 	export MY_MIRROR_REGISTRY_HTTP_PORT=${MIRROR_REGISTRY_HTTP_PORT-8090}
 
 	# disable firewall first
-	systemctl stop firewalld;systemctl disable firewalld
+	systemctl status firewalld > /dev/null 2>&1 && systemctl stop firewalld && systemctl disable firewalld
 
 	# install the dependent tools
 	yum -y install wget podman httpd-tools jq nginx
@@ -81,11 +81,11 @@ begin_banner "Top level" "create an OCP mirror registry"
 	wget -c https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/${MY_OCP_RELEASE_MAIN_VERSION}/latest/rhcos-${MY_RHCOS_RELEASE}-x86_64-live-kernel-x86_64 -O ${MY_MIRROR_DIR}/dependencies/rhcos-${MY_RHCOS_RELEASE}-x86_64-live-kernel-x86_64
 	wget -c https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/${MY_OCP_RELEASE_MAIN_VERSION}/latest/rhcos-${MY_RHCOS_RELEASE}-x86_64-live-initramfs.x86_64.img -O ${MY_MIRROR_DIR}/dependencies/rhcos-${MY_RHCOS_RELEASE}-x86_64-live-initramfs.x86_64.img
 	wget -c https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/${MY_OCP_RELEASE_MAIN_VERSION}/latest/rhcos-${MY_RHCOS_RELEASE}-x86_64-live-rootfs.x86_64.img -O ${MY_MIRROR_DIR}/dependencies/rhcos-${MY_RHCOS_RELEASE}-x86_64-live-rootfs.x86_64.img
-    # for liveCD installation
+        # for liveCD installation
 	wget -c https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/${MY_OCP_RELEASE_MAIN_VERSION}/latest/rhcos-${MY_RHCOS_RELEASE}-x86_64-live.x86_64.iso -O ${MY_MIRROR_DIR}/dependencies/rhcos-${MY_RHCOS_RELEASE}-x86_64-live.x86_64.iso
 
 	# following is for OVA install
-	wget -c https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/${MY_OCP_RELEASE_MAIN_VERSION}/latest/rhcos-${MY_RHCOS_RELEASE}-x86_64-vmware.x86_64.ova -O ${MY_MIRROR_DIR}/dependencies/rhcos-${MY_RHCOS_RELEASE}-x86_64-vmware.x86_64.ova
+	# wget -c https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/${MY_OCP_RELEASE_MAIN_VERSION}/latest/rhcos-${MY_RHCOS_RELEASE}-x86_64-vmware.x86_64.ova -O ${MY_MIRROR_DIR}/dependencies/rhcos-${MY_RHCOS_RELEASE}-x86_64-vmware.x86_64.ova
 
 	# extract and install oc into /usr/local/bin
 	tar xvzf ${MY_MIRROR_DIR}/clients/openshift-client-linux.tar.gz -C /usr/local/bin

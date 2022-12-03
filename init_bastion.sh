@@ -26,7 +26,7 @@ begin_banner "Top level" "project env prepare"
           my_exit "only support centos/RHEL 8.x" 126
         fi
 
-        systemctl stop firewalld;systemctl disable firewalld
+        systemctl status firewalld > /dev/null 2>&1 && systemctl stop firewalld && systemctl disable firewalld
         yum -y update
         yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
         yum install -y ansible bind-utils buildah chrony dnsmasq git \
