@@ -1,0 +1,1 @@
+sudo coreos-installer install /dev/sda --append-karg 'ip={{item}}::{{hostvars[item]['gateway']}}:255.255.255.0:{{hostvars[item]['host']}}.{{cluster_name}}.{{domain_name}}:{{node_interface_name}}:none nameserver={{groups['bastion'][0]}}' --ignition-url=http://{{groups['bastion'][0]}}:{{http_server_port}}/{{ocp_install_dir}}/{{node_type}}.ign --insecure-ignition

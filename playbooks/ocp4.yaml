@@ -78,6 +78,7 @@
         tags: tftp
       - include: tasks/pxe_links.yaml
       when: rhcos_installation_method|upper=="PXE"
+    - include: tasks/coreos_installer_command.yaml
     - include: tasks/dns_server.yaml
       tags: dns
     - include: tasks/dns_interface.yaml

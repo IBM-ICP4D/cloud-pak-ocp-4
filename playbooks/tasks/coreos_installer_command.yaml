@@ -1,0 +1,36 @@
+---
+- name: Generate CoreOS installer command for bootstrap
+  template:
+    src: coreos_installer_command.j2
+    dest: "{{ocp_install_dir}}/coreos_installer_command.{{hostvars[item]['host']}}"
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - "{{groups['bootstrap']}}"
+  vars:
+    node_type: bootstrap
+
+- name: Generate CoreOS installer command for masters
+  template:
+    src: coreos_installer_command.j2
+    dest: "{{ocp_install_dir}}/coreos_installer_command.{{hostvars[item]['host']}}"
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - "{{groups['masters']}}"
+  vars:
+    node_type: master
+
+- name: Generate CoreOS installer command for workers
+  template:
+    src: coreos_installer_command.j2
+    dest: "{{ocp_install_dir}}/coreos_installer_command.{{hostvars[item]['host']}}"
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - "{{groups['workers']}}"
+  vars:
+    node_type: worker
