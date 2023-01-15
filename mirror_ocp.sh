@@ -48,7 +48,7 @@ begin_banner "Top level" "create an OCP mirror registry"
 
         export MY_OCP_RELEASE_MAIN_VERSION="${OCP_RELEASE_MAIN_VERSION-$openshift_release}"
         export MY_OCP_RELEASE="${OCP_RELEASE-$MY_OCP_RELEASE_MAIN_VERSION.52}"
-        export MY_RHCOS_RELEASE="${RHCOS_RELEASE-$MY_OCP_RELEASE_MAIN_VERSION.14}"
+        export MY_RHCOS_RELEASE="${RHCOS_RELEASE-$MY_OCP_RELEASE_MAIN_VERSION.47}"
         export MY_LOCAL_REPOSITORY="${LOCAL_REPOSITORY-ocp4/openshift4}"
         export MY_PRODUCT_REPO="${PRODUCT_REPO-openshift-release-dev}"
         export MY_MIRROR_DIR="${MIRROR_DIR-$air_gapped_download_dir}"
