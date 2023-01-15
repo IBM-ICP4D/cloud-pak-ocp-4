@@ -72,6 +72,9 @@ pushd $SCRIPT_DIR > /dev/null
 # Run ansible playbook
 inventory_file=$(realpath $INVENTORY_FILE_PARAM)
 
+# init the bastion machine
+"$SCRIPT_DIR"/init_bastion.sh
+
 # add airgap install support if air_gapped_install=True
 is_airgap_install=$(grep 'air_gapped_install=' "$inventory_file"|grep -v '#'|awk -F'=' '{print $2}')
 if [ "X$is_airgap_install" == "XTrue" ]; then

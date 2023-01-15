@@ -9,7 +9,7 @@ fi
 
 init_with_root_or_sudo "$0"
 
-begin_banner "Top level" "project env prepare"
+begin_banner "Top level" "Init bastion machine"
 
     case ${THE_DISTRIBUTION_ID} in
       debian)
@@ -41,5 +41,4 @@ begin_banner "Top level" "project env prepare"
       *) ;;
     esac
 
-done_banner "Top level" "project env prepare"
-
+done_banner "Top level" "Init bastion machine"
