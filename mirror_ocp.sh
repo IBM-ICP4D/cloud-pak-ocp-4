@@ -68,8 +68,8 @@ begin_banner "Top level" "create an OCP mirror registry"
         grep "${PRIV_IP} ${MY_REGISTRY_SERVER} registry" /etc/hosts > /dev/null || echo "${PRIV_IP} ${MY_REGISTRY_SERVER} registry" >> /etc/hosts
 
         # make mirror dir
-        mkdir -p "${MY_MIRROR_DIR}/{clients,dependencies,ocp4_install}"
-        mkdir -p "${MY_MIRROR_DIR}/registry/{auth,certs,data,images}"
+        mkdir -p "${MY_MIRROR_DIR}"/{clients,dependencies,ocp4_install}
+        mkdir -p "${MY_MIRROR_DIR}"/registry/{auth,certs,data,images}
 
         # download oc client
         wget -c "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest-${MY_OCP_RELEASE_MAIN_VERSION}/openshift-client-linux.tar.gz" -O "${MY_MIRROR_DIR}/clients/openshift-client-linux.tar.gz"
