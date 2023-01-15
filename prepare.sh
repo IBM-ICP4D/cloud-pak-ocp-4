@@ -72,6 +72,16 @@ pushd $SCRIPT_DIR > /dev/null
 # Run ansible playbook
 inventory_file=$(realpath $INVENTORY_FILE_PARAM)
 
+# add airgap install support if air_gapped_install=True
+is_airgap_install=$(grep 'air_gapped_install=' "$inventory_file"|grep -v '#'|awk -F'=' '{print $2}')
+if [ "X$is_airgap_install" == "XTrue" ]; then
+  sh -c ". $inventory_file 2>/dev/null; pull_secret_file=$pull_secret_file $SCRIPT_DIR/mirror_ocp.sh"
+  # replace the pull_secret file with the new one which includes the mirror registry
+  air_gapped_download_dir=$(grep 'air_gapped_download_dir=' "$inventory_file"|grep -v '#'|awk -F'=' '{print $2}')
+  echo "mirrored created, using the new pull_secret file: ${air_gapped_download_dir}/ocp4_install/ocp_pullsecret.json"
+  export pull_secret_file="${air_gapped_download_dir}/ocp4_install/ocp_pullsecret.json"
+fi
+
 ansible-playbook -i $inventory_file playbooks/ocp4.yaml \
   -e ansible_ssh_pass=$root_password \
   -e ocp_admin_password=$ocp_admin_password \
