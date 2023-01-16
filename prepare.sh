@@ -79,7 +79,7 @@ my_exit () {
 }
 
 # init the bastion machine
-"$SCRIPT_DIR"/init_bastion.sh || my_exist "failed to initialize the bostion machine" 224
+"$SCRIPT_DIR"/init_bastion.sh || my_exit "failed to initialize the bostion machine" 224
 
 # add airgap install support if air_gapped_install=True
 is_airgap_install=$(grep 'air_gapped_install=' "$inventory_file"|grep -v '#'|awk -F'=' '{print $2}')
@@ -96,7 +96,7 @@ if [ "X$is_airgap_install" == "XTrue" ]; then
     air_gapped_download_dir=$air_gapped_download_dir \
     http_server_port=$http_server_port \
     "$SCRIPT_DIR/mirror_ocp.sh" \
-    || my_exist "failed to create the OCP mirror" 224
+    || my_exit "failed to create the OCP mirror" 224
   # replace the pull_secret file with the new one which includes the mirror registry
   echo "mirrored created, using the new pull_secret file: ${air_gapped_download_dir}/ocp4_install/ocp_pullsecret.json"
   export pull_secret_file="${air_gapped_download_dir}/ocp4_install/ocp_pullsecret.json"
