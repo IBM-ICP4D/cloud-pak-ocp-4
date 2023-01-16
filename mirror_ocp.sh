@@ -130,8 +130,7 @@ begin_banner "Top level" "create an OCP mirror registry"
         # generate the pull secret for the mirroed registry
         AUTH=$(echo -n "$MY_REGISTRY_USER:$MY_REGISTRY_PASSWORD" | base64 -w0)
 
-        CUST_REG='{"%s": {"auth":"%s", "email":"%s"}}\n'
-        printf "$CUST_REG" "$MY_LOCAL_REGISTRY" "$AUTH" "$MY_EMAIL" > /tmp/local_reg.json
+        printf '{"%s": {"auth":"%s", "email":"%s"}}\n' "$MY_LOCAL_REGISTRY" "$AUTH" "$MY_EMAIL" > /tmp/local_reg.json
 
         jq --argjson authinfo "$(</tmp/local_reg.json)" '.auths += $authinfo' "${pull_secret_file-/tmp/ocp_pullsecret.json}" > "${MY_MIRROR_DIR}/ocp4_install/ocp_pullsecret.json"
 
