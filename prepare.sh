@@ -82,13 +82,13 @@ my_exit () {
 "$SCRIPT_DIR"/init_bastion.sh || my_exit "failed to initialize the bostion machine" 224
 
 # add airgap install support if air_gapped_install=True
-is_airgap_install=$(grep 'air_gapped_install=' "$inventory_file"|grep -v '#'|awk -F'=' '{print $2}')
+is_airgap_install=$(grep 'air_gapped_install=' "$inventory_file"|grep -v '#'|awk -F'=' '{print $2}'|tr -d '"')
 if [ "X$is_airgap_install" == "XTrue" ]; then
-  domain_name=$(grep 'domain_nam=' "$inventory_file"|grep -v '#'|awk -F'=' '{print $2}')
-  air_gapped_registry_server=$(grep 'air_gapped_registry_server=' "$inventory_file"|grep -v '#'|awk -F'=' '{print $2}')
-  air_gapped_download_dir=$(grep 'air_gapped_download_dir=' "$inventory_file"|grep -v '#'|awk -F'=' '{print $2}')
-  http_server_port=$(grep 'http_server_port=' "$inventory_file"|grep -v '#'|awk -F'=' '{print $2}')
-  openshift_release=$(grep 'openshift_release=' "$inventory_file"|grep -v '#'|awk -F'=' '{print $2}')
+  domain_name=$(grep 'domain_nam=' "$inventory_file"|grep -v '#'|awk -F'=' '{print $2}'|tr -d '"')
+  air_gapped_registry_server=$(grep 'air_gapped_registry_server=' "$inventory_file"|grep -v '#'|awk -F'=' '{print $2}'|tr -d '"')
+  air_gapped_download_dir=$(grep 'air_gapped_download_dir=' "$inventory_file"|grep -v '#'|awk -F'=' '{print $2}'|tr -d '"')
+  http_server_port=$(grep 'http_server_port=' "$inventory_file"|grep -v '#'|awk -F'=' '{print $2}'|tr -d '"')
+  openshift_release=$(grep 'openshift_release=' "$inventory_file"|grep -v '#'|awk -F'=' '{print $2}'|tr -d '"')
   pull_secret_file=$pull_secret_file \
     domain_name=$domain_name \
     openshift_release=$openshift_release \
