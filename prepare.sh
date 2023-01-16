@@ -72,6 +72,12 @@ pushd $SCRIPT_DIR > /dev/null
 # Run ansible playbook
 inventory_file=$(realpath $INVENTORY_FILE_PARAM)
 
+# Utilities function
+my_exit () {
+    echo "EXIT: - [HOST:$(hostname)]: - $(date +"%Y-%m-%d %H:%M:%S") - $1"
+    exit "$2"
+}
+
 # init the bastion machine
 "$SCRIPT_DIR"/init_bastion.sh || my_exist "failed to initialize the bostion machine" 224
 
