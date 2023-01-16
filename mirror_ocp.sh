@@ -38,22 +38,22 @@ begin_banner "Top level" "create an OCP mirror registry"
         fi
 
         # export environment variables for reusing
-        export MY_REGISTRY_DOMAIN="${REGISTRY_DOMAIN-$domain_name}"
-        export MY_REGISTRY_SERVER="${REGISTRY_SERVER-$air_gapped_registry_server}"
+        export MY_REGISTRY_DOMAIN=${REGISTRY_DOMAIN-$domain_name}
+        export MY_REGISTRY_SERVER=${REGISTRY_SERVER-$air_gapped_registry_server}
         export MY_REGISTRY_PORT=${REGISTRY_PORT-5000}
-        export MY_LOCAL_REGISTRY="${LOCAL_REGISTRY-$MY_REGISTRY_SERVER:$MY_REGISTRY_PORT}"
-        export MY_EMAIL="${EMAIL-admin@$MY_REGISTRY_DOMAIN}"
-        export MY_REGISTRY_USER="${REGISTRY_USER-admin}"
-        export MY_REGISTRY_PASSWORD="${REGISTRY_PASSWORD-passw0rd}"
+        export MY_LOCAL_REGISTRY=${LOCAL_REGISTRY-$MY_REGISTRY_SERVER:$MY_REGISTRY_PORT}
+        export MY_EMAIL=${EMAIL-admin@$MY_REGISTRY_DOMAIN}
+        export MY_REGISTRY_USER=${REGISTRY_USER-admin}
+        export MY_REGISTRY_PASSWORD=${REGISTRY_PASSWORD-passw0rd}
 
-        export MY_OCP_RELEASE_MAIN_VERSION="${OCP_RELEASE_MAIN_VERSION-$openshift_release}"
-        export MY_OCP_RELEASE="${OCP_RELEASE-$MY_OCP_RELEASE_MAIN_VERSION.52}"
-        export MY_RHCOS_RELEASE="${RHCOS_RELEASE-$MY_OCP_RELEASE_MAIN_VERSION.47}"
-        export MY_LOCAL_REPOSITORY="${LOCAL_REPOSITORY-ocp4/openshift4}"
-        export MY_PRODUCT_REPO="${PRODUCT_REPO-openshift-release-dev}"
-        export MY_MIRROR_DIR="${MIRROR_DIR-$air_gapped_download_dir}"
-        export MY_LOCAL_SECRET_JSON="${LOCAL_SECRET_JSON-$MY_MIRROR_DIR/ocp4_install/ocp_pullsecret.json}"
-        export MY_RELEASE_NAME="${RELEASE_NAME-ocp-release}"
+        export MY_OCP_RELEASE_MAIN_VERSION=${OCP_RELEASE_MAIN_VERSION-$openshift_release}
+        export MY_OCP_RELEASE=${OCP_RELEASE-$MY_OCP_RELEASE_MAIN_VERSION.52}
+        export MY_RHCOS_RELEASE=${RHCOS_RELEASE-$MY_OCP_RELEASE_MAIN_VERSION.47}
+        export MY_LOCAL_REPOSITORY=${LOCAL_REPOSITORY-ocp4/openshift4}
+        export MY_PRODUCT_REPO=${PRODUCT_REPO-openshift-release-dev}
+        export MY_MIRROR_DIR=${MIRROR_DIR-$air_gapped_download_dir}
+        export MY_LOCAL_SECRET_JSON=${LOCAL_SECRET_JSON-$MY_MIRROR_DIR/ocp4_install/ocp_pullsecret.json}
+        export MY_RELEASE_NAME=${RELEASE_NAME-ocp-release}
 
         export MY_MIRROR_REGISTRY_HTTP_PORT=${MIRROR_REGISTRY_HTTP_PORT-$http_server_port}
 
