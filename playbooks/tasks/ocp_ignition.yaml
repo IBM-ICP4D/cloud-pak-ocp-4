@@ -72,7 +72,7 @@
 - block:
   - name: Check if SELinux has already been configured for ignition files
     shell:
-      semanage fcontext | grep httpd_sys_content_t | grep '{{ ocp_install_dir }}/.*\.ign' | wc -l
+      semanage fcontext -l | grep httpd_sys_content_t | grep '{{ ocp_install_dir }}/.*\.ign' | wc -l
     register: _http_ignition
 
   - name: Enable access to ignition files for nginx (SELinux)
@@ -104,7 +104,7 @@
 - block:
   - name: Check if SELinux has already been configured for base64 ignition files
     shell:
-      semanage fcontext | grep httpd_sys_content_t | grep '{{ ocp_install_dir }}/.*\.ign\.64' | wc -l
+      semanage fcontext -l | grep httpd_sys_content_t | grep '{{ ocp_install_dir }}/.*\.ign\.64' | wc -l
     register: _http_ignition_64
 
   - name: Enable access to base64 ignition files for nginx (SELinux)

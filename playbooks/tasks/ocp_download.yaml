@@ -107,7 +107,7 @@
 - block:
   - name: Check if SELinux has already been configured for CoreOS Kernel package
     shell:
-      semanage fcontext | grep httpd_sys_content_t | grep '{{ocp_install_dir}}/{{rhcos_kernel_package}}' | wc -l
+      semanage fcontext -l | grep httpd_sys_content_t | grep '{{ocp_install_dir}}/{{rhcos_kernel_package}}' | wc -l
     register: _selinux_rhcos
   - name: Enable access to CoreOS Kernel package
     shell: |
@@ -116,7 +116,7 @@
 
   - name: Check if SELinux has already been configured for CoreOS initramfs package
     shell:
-      semanage fcontext | grep httpd_sys_content_t | grep '{{ocp_install_dir}}/{{rhcos_initramfs_package}}' | wc -l
+      semanage fcontext -l | grep httpd_sys_content_t | grep '{{ocp_install_dir}}/{{rhcos_initramfs_package}}' | wc -l
     register: _selinux_rhcos
   - name: Enable access to CoreOS initramfs package
     shell: |
@@ -125,7 +125,7 @@
 
   - name: Check if SELinux has already been configured for CoreOS rootfs package
     shell:
-      semanage fcontext | grep httpd_sys_content_t | grep '{{ocp_install_dir}}/{{rhcos_rootfs_package}}' | wc -l
+      semanage fcontext -l | grep httpd_sys_content_t | grep '{{ocp_install_dir}}/{{rhcos_rootfs_package}}' | wc -l
     register: _selinux_rhcos
   - name: Enable access to CoreOS rootfs package
     shell: |

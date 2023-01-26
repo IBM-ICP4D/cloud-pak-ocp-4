@@ -38,12 +38,12 @@
 - block:
   - name: Check if SELinux has already been configured for TFTP files
     shell:
-      semanage fcontext | grep httpd_sys_content_t | grep '{{ocp_install_dir}}/tftpboot(/.*)?' | wc -l
+      semanage fcontext -l | grep tftpdir_t | grep '{{ocp_install_dir}}/tftpboot(/.*)?' | wc -l
     register: _tftp_selinux
 
   - name: Enable access to TFTP files (SELinux)
     shell: |
-      semanage fcontext -a -t httpd_sys_content_t -s system_u '{{ocp_install_dir}}/tftpboot(/.*)?'
+      semanage fcontext -a -t tftpdir_t -s system_u '{{ocp_install_dir}}/tftpboot(/.*)?'
     when: _tftp_selinux.stdout == "0"
   when: 
   - ansible_selinux.status=='enabled'
