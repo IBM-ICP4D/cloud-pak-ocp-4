@@ -215,4 +215,6 @@
       - name: Final step ==> wait for cluster operators to become ready
         shell: |
           {{ocp_install_dir}}/scripts/wait_co_ready.sh
-      when: run_install|bool
+      when: 
+      - run_install|bool
+      - not skip_install
