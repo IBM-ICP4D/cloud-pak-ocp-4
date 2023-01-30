@@ -7,10 +7,10 @@
   become: no
   tasks:
     - name: Import vSphere certificates
-      include: tasks/vm_import_certificates.yaml
+      include_tasks: tasks/vm_import_certificates.yaml
 
     - name: Create bootstrap vm
-      include: tasks/vm_create.yaml
+      include_tasks: tasks/vm_create.yaml
       vars:
         ocp_group: bootstrap
         vm_memory: "{{ vm_bootstrap_mem }}"
@@ -18,7 +18,7 @@
         vm_disk: "{{ vm_bootstrap_disk }}"
         
     - name: Create master vms
-      include: tasks/vm_create.yaml
+      include_tasks: tasks/vm_create.yaml
       vars:
         ocp_group: masters
         vm_memory: "{{ vm_master_mem }}"
@@ -26,7 +26,7 @@
         vm_disk: "{{ vm_master_disk }}"
 
     - name: Create worker vms
-      include: tasks/vm_create.yaml
+      include_tasks: tasks/vm_create.yaml
       vars:
         ocp_group: workers
         vm_memory: "{{ vm_worker_mem }}"

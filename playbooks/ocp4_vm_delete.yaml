@@ -7,16 +7,16 @@
   become: no
   tasks:
     - name: Delete bootstrap vm
-      include: tasks/vm_delete.yaml
+      include_tasks: tasks/vm_delete.yaml
       vars:
         ocp_group: bootstrap
 
     - name: Delete master vms
-      include: tasks/vm_delete.yaml
+      include_tasks: tasks/vm_delete.yaml
       vars:
         ocp_group: masters
 
     - name: Delete worker vms
-      include: tasks/vm_delete.yaml
+      include_tasks: tasks/vm_delete.yaml
       vars:
         ocp_group: workers

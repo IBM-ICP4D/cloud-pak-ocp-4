@@ -58,7 +58,7 @@
     group: root
     mode: 0755
 
-- include: nfs_storage_class_script.yaml
+- include_tasks: nfs_storage_class_script.yaml
   when: create_nfs_sc|bool
 
 - name: Generate {{ocp_install_dir}}/scripts/disable_dhcp.sh

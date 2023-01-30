@@ -7,19 +7,19 @@
   become: no
   tasks:
     - name: Poweron bootstrap vm
-      include: tasks/vm_poweron.yaml
+      include_tasks: tasks/vm_poweron.yaml
       vars:
         ocp_group: bootstrap
         pause: 0
 
     - name: Poweron master vms
-      include: tasks/vm_poweron.yaml
+      include_tasks: tasks/vm_poweron.yaml
       vars:
         ocp_group: masters
         pause: 1
 
     - name: Poweron worker vms
-      include: tasks/vm_poweron.yaml
+      include_tasks: tasks/vm_poweron.yaml
       vars:
         ocp_group: workers
         pause: 1

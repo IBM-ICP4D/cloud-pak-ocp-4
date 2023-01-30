@@ -21,12 +21,12 @@
   gather_facts: no
   become: no
   tasks:
-    - include: tasks/init_facts.yaml
-    - include: tasks/check_variables.yaml
-    - include: tasks/dns_reset.yaml
-    - include: tasks/firewall_iptables_remove.yaml
-    - include: tasks/set_hostname.yaml
-    - include: tasks/hosts.yaml
+    - include_tasks: tasks/init_facts.yaml
+    - include_tasks: tasks/check_variables.yaml
+    - include_tasks: tasks/dns_reset.yaml
+    - include_tasks: tasks/firewall_iptables_remove.yaml
+    - include_tasks: tasks/set_hostname.yaml
+    - include_tasks: tasks/hosts.yaml
       tags: hosts
 - name: Configure SSH
   import_playbook: tasks/ssh_playbook.yaml
@@ -49,8 +49,8 @@
   gather_facts: yes
   become: no
   tasks:
-    - include: tasks/ocp_install_dir.yaml
-    - include: tasks/ocp_download.yaml
+    - include_tasks: tasks/ocp_install_dir.yaml
+    - include_tasks: tasks/ocp_download.yaml
       tags: download
       when: install_script_already_run==False
 
@@ -63,31 +63,31 @@
   gather_facts: yes
   become: no
   tasks:
-    - include: tasks/global_proxy.yaml
+    - include_tasks: tasks/global_proxy.yaml
       tags: proxy
-    - include: tasks/chrony_server.yaml
+    - include_tasks: tasks/chrony_server.yaml
       tags: chrony
-    - include: tasks/chrony_client.yaml
+    - include_tasks: tasks/chrony_client.yaml
       tags: chrony
-    - include: tasks/http_server.yaml
+    - include_tasks: tasks/http_server.yaml
       tags: http
-    - include: tasks/etc_ansible_hosts.yaml
-    - include: tasks/dnsmasq_libvirt_remove.yaml
+    - include_tasks: tasks/etc_ansible_hosts.yaml
+    - include_tasks: tasks/dnsmasq_libvirt_remove.yaml
     - block:
-      - include: tasks/tftpboot.yaml
+      - include_tasks: tasks/tftpboot.yaml
         tags: tftp
-      - include: tasks/pxe_links.yaml
+      - include_tasks: tasks/pxe_links.yaml
       when: rhcos_installation_method|upper=="PXE"
-    - include: tasks/dns_server.yaml
+    - include_tasks: tasks/dns_server.yaml
       tags: dns
-    - include: tasks/dns_interface.yaml
+    - include_tasks: tasks/dns_interface.yaml
       tags: dns
 
 - hosts: lb
   gather_facts: yes
   become: yes
   tasks:
-    - include: tasks/haproxy.yaml
+    - include_tasks: tasks/haproxy.yaml
       tags: haproxy
       when: manage_load_balancer is not defined or manage_load_balancer|bool
 
@@ -96,13 +96,13 @@
   become: yes
   tasks:
     - name: Prepare NFS volume
-      include: tasks/prepare_xfs_volume.yaml
+      include_tasks: tasks/prepare_xfs_volume.yaml
       vars:
         volume_selector: "{{ nfs_volume_selector }}"
         mount_point: "{{ nfs_volume_mount_path }}"
       when: manage_nfs|bool
     - name: Configure NFS server
-      include: tasks/nfs_server.yaml
+      include_tasks: tasks/nfs_server.yaml
       when: manage_nfs|bool
 
 #
@@ -114,25 +114,25 @@
   gather_facts: yes
   become: yes
   tasks:
-    - include: tasks/ocp_install_config.yaml
+    - include_tasks: tasks/ocp_install_config.yaml
       tags: ocp_install_config
-    - include: tasks/ocp_ignition.yaml
+    - include_tasks: tasks/ocp_ignition.yaml
       tags: ignition
       when: rhcos_installation_method|upper!="IPI"
-    - include: tasks/ocp_customize_iso.yaml
+    - include_tasks: tasks/ocp_customize_iso.yaml
       tags: install_ocp
       when: rhcos_installation_method|upper=="ISO"
     - block: 
-      - include: tasks/ocp_install_ipi.yaml
+      - include_tasks: tasks/ocp_install_ipi.yaml
         tags: install_ocp
         when: rhcos_installation_method|upper=="IPI"
-      - include: tasks/create_oauth.yaml
+      - include_tasks: tasks/create_oauth.yaml
       when: 
       - install_script_already_run==False
       - not skip_install
 
-    - include: tasks/registry_storage.yaml
-    - include: tasks/ocp_install_scripts.yaml
+    - include_tasks: tasks/registry_storage.yaml
+    - include_tasks: tasks/ocp_install_scripts.yaml
       tags: scripts
 
 - import_playbook: ocp4_vm_power_on.yaml
