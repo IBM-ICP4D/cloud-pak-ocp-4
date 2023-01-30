@@ -63,6 +63,7 @@ rhcos_kernel_package_pattern=".*(rhcos.*-kernel.x86_64).*"
 rhcos_initramfs_package_pattern=".*(rhcos.*initramfs.x86_64.img).*"
 rhcos_rootfs_package_pattern=".*(rhcos.*rootfs.x86_64.img).*"
 rhcos_ova_package_pattern=".*(rhcos.*.ova).*"
+rhcos_iso_package_pattern=".*(rhcos.*.iso).*"
 
 #
 # Indicate whether to opt out of remote health checking of the OpenShift cluster
