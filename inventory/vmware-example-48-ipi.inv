@@ -7,11 +7,13 @@ ansible_ssh_common_args='-o StrictHostKeyChecking=no'
 domain_name="coc.ibm.com"
 cluster_name="ocp48"
 default_gateway="10.99.92.1"
+network_mask="24"
 
 #
 # Indicate the method by which Red Hat CoreOS will be installed. This can be one of the following values:
 # - pxe: CoreOS will be loaded on the bootstrap, masters and workers using PXE-boot. This is the default.
 # - ova: Only for VMWare. CoreOS will be loaded using a VMWare template (imported OVA file).
+# - iso: CoreOS will be loaded using an ISO image (imported ISO file).
 # - ipi: Only for VMWare. CoreOS and OpenShift will be installed via Installer-provisioned infrastructure. OpenShift
 #        will take care of creating the required VMs and automatically assigns hostnames. If you choose this installation
 #        method, please also complete the IPI section in the inventory file.
@@ -82,9 +84,11 @@ ntp_servers=['10.99.240.1']
 override_chrony_settings_on_cluster_nodes=True
 
 #
-# A DNS server (dnsmasq) will be set up on the bastion node. Specify the upstream name server
-# that dnsmasq will use.
+# Specify whether a DNS server (dnsmasq) will be set up on the bastion node. Specify the upstream name server
+# that dnsmasq will use. If DNS is not installed on the bastion, the host names, api, api-int and *.apps configuration must have been manually made on the specifies dns_server.
 #
+dns_on_bastion=True
+dns_server="10.99.92.50"
 external_name_servers=['8.8.8.8']
 interface_script="/etc/sysconfig/network-scripts/ifcfg-ens192"
 
