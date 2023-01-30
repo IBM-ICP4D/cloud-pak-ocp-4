@@ -1,5 +1,10 @@
 ---
-
+- name: Stop service dnsmasq
+  service:
+    name: dnsmasq
+    enabled: False
+    state: stopped
+    
 - name: Create backup of /etc/resolv.conf
   copy:
     src: /etc/resolv.conf
@@ -13,9 +18,11 @@
     owner: root
     group: root
     mode: 0644
+  when: dns_server_on_bastion | default(True) | bool
 
 - name: Start service dnsmasq
   service:
     name: dnsmasq
     enabled: yes
     state: restarted
+  when: dns_server_on_bastion | default(True) | bool

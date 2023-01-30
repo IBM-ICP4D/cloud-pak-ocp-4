@@ -8,3 +8,11 @@
     set_bastion_hostname: "{{ set_bastion_hostname | default(False) }}"
     rhcos_installation_method: "{{ rhcos_installation_method | default('PXE') }}"
     vm_create_vms: "{{ vm_create_vms | default(False) }}"
+
+- set_fact:
+    _dns_server: "{{groups['bastion'][0]}}"
+  when: dns_on_bastion | default(True) | bool
+
+- set_fact:
+    _dns_server: "{{dns_server}}"
+  when: not (dns_on_bastion | default(True) | bool)
