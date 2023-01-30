@@ -114,12 +114,15 @@
   gather_facts: yes
   become: yes
   tasks:
+    - include: tasks/ocp_install_config.yaml
+      tags: ocp_install_config
+    - include: tasks/ocp_ignition.yaml
+      tags: ignition
+      when: rhcos_installation_method|upper!="IPI"
+    - include: tasks/ocp_customize_iso.yaml
+      tags: install_ocp
+      when: rhcos_installation_method|upper=="ISO"
     - block: 
-      - include: tasks/ocp_install_config.yaml
-        tags: ocp_install_config
-      - include: tasks/ocp_ignition.yaml
-        tags: ignition
-        when: rhcos_installation_method|upper!="IPI"
       - include: tasks/ocp_install_ipi.yaml
         tags: install_ocp
         when: rhcos_installation_method|upper=="IPI"

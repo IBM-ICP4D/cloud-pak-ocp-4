@@ -39,6 +39,10 @@
     rhcos_ova_package: "{{rhcos_packages.stdout | regex_search(vars['rhcos_ova_package_pattern'],'\\1') | first }}"
   when: rhcos_installation_method=="ova"
 
+- set_fact:
+    rhcos_iso_package: "{{rhcos_packages.stdout | regex_search(vars['rhcos_iso_package_pattern'],'\\1') | first }}"
+  when: rhcos_installation_method=="iso"
+
 - name: Download OpenShift client '{{openshift_base_url | regex_replace("\/$", "")}}/{{openshift_client_package}}'
   get_url:
     url: '{{openshift_base_url | regex_replace("\/$", "")}}/{{openshift_client_package}}'
@@ -146,3 +150,11 @@
     owner: root
     mode: 0644
   when: rhcos_installation_method=="ova"
+
+- name: Download CoreOS ISO package '{{rhcos_base_url | regex_replace("\/$", "")}}/{{rhcos_iso_package}}'
+  get_url:
+    url: '{{rhcos_base_url | regex_replace("\/$", "")}}/{{rhcos_iso_package}}'
+    dest: "{{ocp_install_dir}}/{{rhcos_iso_package}}"
+    owner: root
+    mode: 0644
+  when: rhcos_installation_method=="iso"

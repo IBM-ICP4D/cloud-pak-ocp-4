@@ -66,6 +66,57 @@
   register: vm_guest_facts_ova
   when: rhcos_installation_method|upper=="OVA"
 
+- name: Copy ISO file for group {{ ocp_group }} to datastore
+  community.vmware.vsphere_copy:
+    hostname: "{{ vc_vcenter }}"
+    username: "{{ vc_user }}"
+    password: "{{ vc_password }}"
+    src: "{{ocp_install_dir}}/{{cluster_name}}-{{ hostvars[item].host }}.iso"
+    datacenter: "{{ vc_datacenter }}"
+    datastore: "{{ vc_datastore }}"
+    path: "ISO/{{cluster_name}}-{{ hostvars[item].host }}.iso"
+  with_items:
+    - "{{ groups[ocp_group] }}"
+  delegate_to: localhost
+  when: rhcos_installation_method|upper=="ISO"
+
+- name: Create {{ ocp_group }} VMs using ISO
+  vmware_guest:
+    hostname: "{{ vc_vcenter }}"
+    username: "{{ vc_user }}"
+    password: "{{ vc_password }}"
+    validate_certs: yes
+    datacenter: "{{ vc_datacenter }}"
+    cluster: "{{ vc_cluster }}"
+    resource_pool: "{{ vc_res_pool }}"
+    folder: "{{ vc_folder }}"
+    name: "{{cluster_name}}-{{ hostvars[item].host }}"
+    state: present
+    guest_id: "{{ vc_guest_id }}"
+    wait_for_ip_address: no
+    hardware:
+      memory_mb: "{{ vm_memory }}"
+      num_cpus: "{{ vm_cpu }}"
+      boot_firmware: bios
+      scsi: paravirtual
+    disk:
+    - size_gb: "{{ vm_disk }}"
+      datastore: "{{ vc_datastore }}"
+      type: thin
+    networks:
+    - name: "{{ vc_network }}"
+      device_type: vmxnet3
+    cdrom:
+    - iso_path: "[Datastore1] ISO/{{cluster_name}}-{{ hostvars[item].host }}.iso"
+      type: iso
+      controller_number: 0
+      unit_number: 0
+  with_items:
+    - "{{ groups[ocp_group] }}"
+  delegate_to: localhost
+  register: vm_guest_facts_iso
+  when: rhcos_installation_method|upper=="ISO"
+
 - name: Register in inventory file (if empty VMs)
   replace:
     path: "{{ inventory_file }}"

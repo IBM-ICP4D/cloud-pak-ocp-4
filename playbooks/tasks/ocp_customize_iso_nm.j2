@@ -1,0 +1,15 @@
+[connection]
+id=Wired connection 1
+type=ethernet
+interface-name=ens192
+autoconnect=true
+autoconnect-priority=1
+
+[ipv4]
+addresses={{item}}/{{network_mask}}
+method=manual
+dns={{_dns_server}}
+gateway={{default_gateway}}
+
+[ipv6]
+method=disabled

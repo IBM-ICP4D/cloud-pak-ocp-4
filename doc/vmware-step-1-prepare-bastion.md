@@ -32,7 +32,7 @@ yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarc
 ## Install packages on the bastion node
 On the bastion, install the packages which are needed for the preparation, for RHEL-8:
 ```
-yum install -y ansible bind-utils buildah chrony dnsmasq git \
+yum install -y ansible bind-utils buildah chrony coreos-installer dnsmasq git \
     haproxy httpd-tools jq libvirt net-tools nfs-utils nginx podman \
     python3 python3-netaddr python3-passlib python3-pip python3-policycoreutils python3-pyvmomi python3-requests \
     screen sos syslinux-tftpboot wget yum-utils
@@ -40,7 +40,7 @@ yum install -y ansible bind-utils buildah chrony dnsmasq git \
 
 Additionally, install some additional Python modules:
 ```
-pip3 install passlib
+pip3 install passlib requests PyVmomi
 ```
 
 > **Note** If your server has more than 1 Python version, Ansible typically chooses the newest version. If `pip3` references a different version of Python than the one used by Ansible, you may have to find the latest version and run the `pip install` against that version.
@@ -62,7 +62,7 @@ lrwxrwxrwx. 1 root root   8 Oct 18  2021 /usr/bin/pip-3.8 -> ./pip3.8
 
 Now install using `pip3.8`:
 ```
-pip3.8 install passlib
+pip3.8 install passlib requests PyVmomi
 ```
 
 If you have a separate storage server, please install the following packages on that VM (works for both RHEL-8 and RHEL-7):
