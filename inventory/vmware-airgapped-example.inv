@@ -187,6 +187,11 @@ vm_number_of_masters=3
 vm_number_of_workers=3
 
 #
+# Additional variables for ISO installs
+#
+iso_dest_device=/dev/sda
+
+#
 # VMware envrionment specific properties. These are only used if you have selected the IPI installation method, or if
 # you want the prepare script to create the VMs or when using the vm_create.sh script to create these. 
 # You can ignore these properties if you manually create the VMs.

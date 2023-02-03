@@ -178,6 +178,11 @@ vm_number_of_masters=3
 vm_number_of_workers=3
 
 #
+# Additional variables for ISO installs
+#
+iso_dest_device=/dev/sda
+
+#
 # VMware envrionment specific properties. These are required for the IPI installation method.
 #
 vc_vcenter="10.99.92.13"

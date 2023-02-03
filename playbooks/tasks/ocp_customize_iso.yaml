@@ -22,7 +22,7 @@
 - name: Create customized ISO file for bootstrap
   shell: |
     coreos-installer iso customize \
-      --dest-device /dev/sda \
+      --dest-device {{iso_dest_device}} \
       --dest-ignition {{ocp_install_dir}}/bootstrap.ign \
       --network-keyfile {{ocp_install_dir}}/{{cluster_name}}-{{ hostvars[item].host }}.nmconnection \
       -o {{ocp_install_dir}}/{{cluster_name}}-{{ hostvars[item].host }}.iso \
@@ -34,7 +34,7 @@
 - name: Create customized ISO files for masters
   shell: |
     coreos-installer iso customize \
-      --dest-device /dev/sda \
+      --dest-device {{iso_dest_device}} \
       --dest-ignition {{ocp_install_dir}}/master.ign \
       --network-keyfile {{ocp_install_dir}}/{{cluster_name}}-{{ hostvars[item].host }}.nmconnection \
       -o {{ocp_install_dir}}/{{cluster_name}}-{{ hostvars[item].host }}.iso \
@@ -46,7 +46,7 @@
 - name: Create customized ISO files for workers
   shell: |
     coreos-installer iso customize \
-      --dest-device /dev/sda \
+      --dest-device {{iso_dest_device}} \
       --dest-ignition {{ocp_install_dir}}/worker.ign \
       --network-keyfile {{ocp_install_dir}}/{{cluster_name}}-{{ hostvars[item].host }}.nmconnection \
       -o {{ocp_install_dir}}/{{cluster_name}}-{{ hostvars[item].host }}.iso \
