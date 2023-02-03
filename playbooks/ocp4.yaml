@@ -80,6 +80,7 @@
       when: rhcos_installation_method|upper=="PXE"
     - include_tasks: tasks/dns_server.yaml
       tags: dns
+      when: dns_on_bastion | default(True) | bool
     - include_tasks: tasks/dns_interface.yaml
       tags: dns
 

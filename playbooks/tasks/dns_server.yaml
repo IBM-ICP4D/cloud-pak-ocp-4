@@ -18,11 +18,9 @@
     owner: root
     group: root
     mode: 0644
-  when: dns_server_on_bastion | default(True) | bool
 
 - name: Start service dnsmasq
   service:
     name: dnsmasq
     enabled: yes
     state: restarted
-  when: dns_server_on_bastion | default(True) | bool
