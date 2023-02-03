@@ -7,8 +7,6 @@
   until: openshift_packages is not failed
   retries: 10
   delay: 10
-  args:
-    warn: false
 
 - name: Obtain Red Hat CoreOS packages from URL "{{rhcos_base_url}}"
   shell: |
@@ -17,8 +15,6 @@
   until: rhcos_packages is not failed
   retries: 10
   delay: 10
-  args:
-    warn: false
 
 # The below tasks will extract the exact file names from the list of found packages.
 # This is needed because the content of the "latest" directory tends to change without notice.
