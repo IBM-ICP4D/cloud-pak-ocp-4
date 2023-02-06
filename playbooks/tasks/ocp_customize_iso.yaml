@@ -24,6 +24,8 @@
     coreos-installer iso customize \
       --dest-device {{iso_dest_device}} \
       --dest-ignition {{ocp_install_dir}}/bootstrap.ign \
+      --dest-kargs-append ip={{item}}::{{default_gateway}}:255.255.255.0:{{ hostvars[item].host }}:ens192:none \
+      --dest-kargs-append nameserver={{_dns_server}} \
       --network-keyfile {{ocp_install_dir}}/{{cluster_name}}-{{ hostvars[item].host }}.nmconnection \
       -o {{ocp_install_dir}}/{{cluster_name}}-{{ hostvars[item].host }}.iso \
       --force \
@@ -36,6 +38,8 @@
     coreos-installer iso customize \
       --dest-device {{iso_dest_device}} \
       --dest-ignition {{ocp_install_dir}}/master.ign \
+      --dest-kargs-append ip={{item}}::{{default_gateway}}:255.255.255.0:{{ hostvars[item].host }}:ens192:none \
+      --dest-kargs-append nameserver={{_dns_server}} \
       --network-keyfile {{ocp_install_dir}}/{{cluster_name}}-{{ hostvars[item].host }}.nmconnection \
       -o {{ocp_install_dir}}/{{cluster_name}}-{{ hostvars[item].host }}.iso \
       --force \
@@ -48,6 +52,8 @@
     coreos-installer iso customize \
       --dest-device {{iso_dest_device}} \
       --dest-ignition {{ocp_install_dir}}/worker.ign \
+      --dest-kargs-append ip={{item}}::{{default_gateway}}:255.255.255.0:{{ hostvars[item].host }}:ens192:none \
+      --dest-kargs-append nameserver={{_dns_server}} \
       --network-keyfile {{ocp_install_dir}}/{{cluster_name}}-{{ hostvars[item].host }}.nmconnection \
       -o {{ocp_install_dir}}/{{cluster_name}}-{{ hostvars[item].host }}.iso \
       --force \
